@@ -15,4 +15,7 @@ export interface ElectronAPI {
   exportPDF: (filePath: string) => Promise<void>
   exportWord: (filePath: string, buffer: Uint8Array) => Promise<void>
   onMenuOpenFolder: (callback: () => void) => () => void
+  onMenuExportHTML: (callback: () => void) => () => void
+  onMenuExportPDF: (callback: () => void) => () => void
+  onMenuExportWord: (callback: () => void) => () => void
 }

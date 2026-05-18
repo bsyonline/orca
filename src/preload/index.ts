@@ -14,6 +14,18 @@ const api: ElectronAPI = {
     ipcRenderer.on('menu:openFolder', callback)
     return () => ipcRenderer.removeListener('menu:openFolder', callback)
   },
+  onMenuExportHTML: (callback) => {
+    ipcRenderer.on('menu:exportHTML', callback)
+    return () => ipcRenderer.removeListener('menu:exportHTML', callback)
+  },
+  onMenuExportPDF: (callback) => {
+    ipcRenderer.on('menu:exportPDF', callback)
+    return () => ipcRenderer.removeListener('menu:exportPDF', callback)
+  },
+  onMenuExportWord: (callback) => {
+    ipcRenderer.on('menu:exportWord', callback)
+    return () => ipcRenderer.removeListener('menu:exportWord', callback)
+  },
 }
 
 contextBridge.exposeInMainWorld('api', api)
