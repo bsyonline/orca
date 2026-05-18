@@ -16,9 +16,3 @@ export interface ElectronAPI {
   exportWord: (filePath: string, buffer: Uint8Array) => Promise<void>
   onMenuOpenFolder: (callback: () => void) => () => void
 }
-
-declare global {
-  interface Window {
-    api: ElectronAPI
-  }
-}
