@@ -1,0 +1,94 @@
+<h2>主题风格</h2>
+<p class="subtitle">默认视觉基调 — 后续可扩展更多主题</p>
+
+<div class="cards">
+
+  <!-- Option A: Light -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:10px;border-radius:6px;background:#f0eff4;">
+      <div style="border:1px solid #d1d0d8;border-radius:4px;overflow:hidden;height:160px;display:flex;flex-direction:column;">
+        <div style="background:#e8e7ef;padding:5px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #d1d0d8;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#ff5f57;"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:#ffbd2e;"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:#28c840;"></div>
+          <div style="flex:1;text-align:center;color:#888;font-size:9px;">笔记.md</div>
+        </div>
+        <div style="display:flex;flex:1;">
+          <div style="width:33%;background:#e8e7ef;border-right:1px solid #d1d0d8;padding:6px 8px;font-size:9px;">
+            <div style="color:#555;margin-bottom:3px;font-weight:600;">📁 文档</div>
+            <div style="color:#2563eb;background:#dbeafe;border-radius:2px;padding:1px 4px;margin-bottom:2px;">📝 笔记.md</div>
+            <div style="color:#666;padding:1px 4px;">📝 日记.md</div>
+          </div>
+          <div style="flex:1;background:#fafafa;padding:10px 14px;">
+            <div style="color:#1e1e1e;font-size:12px;font-weight:700;margin-bottom:6px;">今日笔记</div>
+            <div style="color:#374151;font-size:9px;line-height:1.7;margin-bottom:4px;">记录一些想法和思考...</div>
+            <div style="background:#f3f4f6;border-left:3px solid #2563eb;padding:3px 6px;font-size:9px;font-family:monospace;color:#1d4ed8;border-radius:0 3px 3px 0;">const x = 42</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A · 明亮模式</h3>
+      <p>白底黑字，接近纸张质感。白天写作舒适，接近 Typora 默认主题风格。</p>
+    </div>
+  </div>
+
+  <!-- Option B: Dark -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:10px;border-radius:6px;background:#11111b;">
+      <div style="border:1px solid #313244;border-radius:4px;overflow:hidden;height:160px;display:flex;flex-direction:column;">
+        <div style="background:#181825;padding:5px 10px;display:flex;align-items:center;gap:5px;border-bottom:1px solid #313244;">
+          <div style="width:8px;height:8px;border-radius:50%;background:#ff5f57;"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:#ffbd2e;"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:#28c840;"></div>
+          <div style="flex:1;text-align:center;color:#6c7086;font-size:9px;">笔记.md</div>
+        </div>
+        <div style="display:flex;flex:1;">
+          <div style="width:33%;background:#181825;border-right:1px solid #313244;padding:6px 8px;font-size:9px;">
+            <div style="color:#cdd6f4;margin-bottom:3px;font-weight:600;">📁 文档</div>
+            <div style="color:#a6e3a1;background:#313244;border-radius:2px;padding:1px 4px;margin-bottom:2px;">📝 笔记.md</div>
+            <div style="color:#6c7086;padding:1px 4px;">📝 日记.md</div>
+          </div>
+          <div style="flex:1;background:#1e1e2e;padding:10px 14px;">
+            <div style="color:#cdd6f4;font-size:12px;font-weight:700;margin-bottom:6px;">今日笔记</div>
+            <div style="color:#bac2de;font-size:9px;line-height:1.7;margin-bottom:4px;">记录一些想法和思考...</div>
+            <div style="background:#181825;border-left:3px solid #89b4fa;padding:3px 6px;font-size:9px;font-family:monospace;color:#89dceb;border-radius:0 3px 3px 0;">const x = 42</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B · 深色模式</h3>
+      <p>深色背景，护眼舒适，适合长时间写作和夜间使用。代码块对比度更突出。</p>
+    </div>
+  </div>
+
+  <!-- Option C: Auto -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:10px;border-radius:6px;background:linear-gradient(135deg,#f0eff4 50%,#11111b 50%);">
+      <div style="display:flex;gap:6px;height:160px;">
+        <div style="flex:1;border:1px solid #d1d0d8;border-radius:4px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="background:#e8e7ef;padding:4px 6px;font-size:8px;color:#888;border-bottom:1px solid #d1d0d8;">☀️ 白天</div>
+          <div style="flex:1;background:#fafafa;padding:6px;">
+            <div style="color:#1e1e1e;font-size:9px;font-weight:700;margin-bottom:3px;">今日笔记</div>
+            <div style="color:#374151;font-size:8px;line-height:1.6;">记录想法...</div>
+            <div style="background:#f3f4f6;border-left:2px solid #2563eb;padding:2px 4px;font-size:7px;font-family:monospace;color:#1d4ed8;margin-top:3px;">const x = 42</div>
+          </div>
+        </div>
+        <div style="flex:1;border:1px solid #313244;border-radius:4px;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="background:#181825;padding:4px 6px;font-size:8px;color:#6c7086;border-bottom:1px solid #313244;">🌙 夜晚</div>
+          <div style="flex:1;background:#1e1e2e;padding:6px;">
+            <div style="color:#cdd6f4;font-size:9px;font-weight:700;margin-bottom:3px;">今日笔记</div>
+            <div style="color:#bac2de;font-size:8px;line-height:1.6;">记录想法...</div>
+            <div style="background:#181825;border-left:2px solid #89b4fa;padding:2px 4px;font-size:7px;font-family:monospace;color:#89dceb;margin-top:3px;">const x = 42</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C · 跟随系统（亮/暗自动切换）</h3>
+      <p>同时支持亮色和暗色，跟随 macOS 系统外观自动切换。最灵活，开发量稍大。</p>
+    </div>
+  </div>
+
+</div>

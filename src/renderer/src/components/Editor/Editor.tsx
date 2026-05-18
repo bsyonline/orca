@@ -35,6 +35,12 @@ export function Editor({ filePath, initialContent }: EditorProps) {
     [filePath, setIsDirty],
   )
 
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    }
+  }, [])
+
   useEditor((root) =>
     MilkdownCoreEditor.make()
       .config((ctx) => {
