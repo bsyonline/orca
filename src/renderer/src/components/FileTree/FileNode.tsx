@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { FileNode as FileNodeType } from '../../../types'
+import type { FileNode as FileNodeType } from '../../../../types'
 import { useAppStore } from '../../store/useAppStore'
 
 interface FileNodeProps {
