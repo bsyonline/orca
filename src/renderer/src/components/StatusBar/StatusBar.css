@@ -1,0 +1,14 @@
+.statusbar {
+  height: var(--statusbar-height);
+  background: var(--statusbar-bg);
+  border-top: 1px solid var(--sidebar-border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.statusbar .filename { font-weight: 500; }
+.statusbar .dirty { color: #f59e0b; }
