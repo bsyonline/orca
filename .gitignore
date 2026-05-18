@@ -5,3 +5,5 @@ out
 *.log*
 orca/
 orca.zip
+.superpowers/
+*.tsbuildinfo
