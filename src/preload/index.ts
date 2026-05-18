@@ -1,22 +1,19 @@
-import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge, ipcRenderer } from 'electron'
+import type { ElectronAPI } from '../types'
 
-// Custom APIs for renderer
-const api = {}
-
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
+const api: ElectronAPI = {
+  openFolder: () => ipcRenderer.invoke('file:openFolder'),
+  listDir: (dirPath) => ipcRenderer.invoke('file:listDir', dirPath),
+  readFile: (filePath) => ipcRenderer.invoke('file:readFile', filePath),
+  writeFile: (filePath, content) => ipcRenderer.invoke('file:writeFile', filePath, content),
+  saveImage: (destDir, imageData, ext) => ipcRenderer.invoke('file:saveImage', destDir, imageData, ext),
+  exportHTML: (filePath, html) => ipcRenderer.invoke('export:html', filePath, html),
+  exportPDF: (filePath) => ipcRenderer.invoke('export:pdf', filePath),
+  exportWord: (filePath, buffer) => ipcRenderer.invoke('export:word', filePath, buffer),
+  onMenuOpenFolder: (callback) => {
+    ipcRenderer.on('menu:openFolder', callback)
+    return () => ipcRenderer.removeListener('menu:openFolder', callback)
+  },
 }
+
+contextBridge.exposeInMainWorld('api', api)
