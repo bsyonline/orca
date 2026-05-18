@@ -13,9 +13,12 @@ export function FileTree({ onOpenFolder, onFileSelect }: FileTreeProps) {
 
   return (
     <div className="file-tree">
+      <div className="file-tree-titlebar" />
       <div className="file-tree-header">
         <span>{workspaceRoot ? basename(workspaceRoot) : '文件'}</span>
-        <button className="open-folder-btn-sm" onClick={onOpenFolder}>打开</button>
+        {workspaceRoot && (
+          <button className="open-folder-btn-sm" onClick={onOpenFolder}>打开</button>
+        )}
       </div>
       {!workspaceRoot && (
         <button className="open-folder-btn" onClick={onOpenFolder}>打开文件夹</button>

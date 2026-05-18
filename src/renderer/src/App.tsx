@@ -37,6 +37,7 @@ export default function App() {
             <FileTree onOpenFolder={handleOpenFolder} onFileSelect={handleFileSelect} />
           </aside>
           <main className="editor-area">
+            <div className="titlebar-drag" />
             {activeFile ? (
               <Editor key={activeFile} filePath={activeFile} initialContent={fileContent} />
             ) : (

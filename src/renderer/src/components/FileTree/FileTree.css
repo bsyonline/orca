@@ -1,5 +1,10 @@
 .file-tree { padding: 8px 0; }
 
+.file-tree-titlebar {
+  height: 38px;
+  -webkit-app-region: drag;
+}
+
 .file-tree-header {
   padding: 8px 12px;
   border-bottom: 1px solid var(--sidebar-border);

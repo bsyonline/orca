@@ -31,7 +31,17 @@ body {
   overflow-y: auto;
 }
 
-.editor-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.editor-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; padding-top: 38px; }
+
+.titlebar-drag {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: 38px;
+  -webkit-app-region: drag;
+  z-index: 10;
+}
 
 .editor-empty {
   display: flex;
