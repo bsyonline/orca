@@ -37,11 +37,6 @@
 }
 
 .table-edge-btn:hover {
-  background: var(--border-def);
-  transform: scale(1.1);
-}
-
-.table-edge-btn:hover {
   background: var(--accent-soft-strong);
   transform: scale(1.1);
 }

@@ -20,12 +20,6 @@
   --accent-soft-strong: rgba(58, 56, 51, 0.10);
 
   --danger:           #dc3545;
-  --danger-soft:        rgba(220, 53, 69, 0.15);
-  --danger-border:      rgba(220, 53, 69, 0.3);
-  --danger-text:        rgba(220, 53, 69, 0.8);
-  --danger-hover:       rgba(220, 53, 69, 0.25);
-
-  --danger:           #dc3545;
   --danger-soft:      rgba(220, 53, 69, 0.15);
   --danger-border:    rgba(220, 53, 69, 0.3);
   --danger-text:      rgba(220, 53, 69, 0.8);

@@ -15,7 +15,7 @@ export function FileNode({ node, onFileSelect }: FileNodeProps) {
     return (
       <div>
         <div className="file-node directory" onClick={() => setExpanded((e) => !e)}>
-          <span>{expanded ? '▾' : '▸'}</span>
+          <span className="file-node-icon">{expanded ? '▾' : '▸'}</span>
           <span>{node.name}</span>
         </div>
         {expanded && node.children && (
@@ -36,7 +36,7 @@ export function FileNode({ node, onFileSelect }: FileNodeProps) {
       className={`file-node ${activeFile === node.path ? 'active' : ''}`}
       onClick={() => onFileSelect(node.path)}
     >
-      <span>📄</span>
+      <span className="file-node-icon">◻</span>
       <span>{node.name}</span>
     </div>
   )

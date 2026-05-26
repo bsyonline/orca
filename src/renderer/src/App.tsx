@@ -1,5 +1,5 @@
 import './App.css'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { MilkdownProvider } from '@milkdown/react'
 import { FileTree } from './components/FileTree/FileTree'
 import { Editor } from './components/Editor/Editor'
@@ -7,21 +7,30 @@ import { StatusBar } from './components/StatusBar/StatusBar'
 import { useAppStore } from './store/useAppStore'
 
 export default function App() {
-  const { activeFile, setActiveFile, setFileTree, setWorkspaceRoot } = useAppStore()
-  const [fileContent, setFileContent] = useState<string>('')
+  const { activeFile, activeFileContent, openFile, setFileTree, setWorkspaceRoot, setActiveFile } = useAppStore()
+  const [sidebarVisible, setSidebarVisible] = useState(true)
 
   const handleOpenFolder = async () => {
-    const folderPath = await window.api.openFolder()
-    if (!folderPath) return
-    setWorkspaceRoot(folderPath)
-    const tree = await window.api.listDir(folderPath)
-    setFileTree(tree)
+    const selectedPath = await window.api.openFolder()
+    if (!selectedPath) return
+    if (selectedPath.endsWith('.md')) {
+      const content = await window.api.readFile(selectedPath)
+      openFile(selectedPath, content)
+    } else {
+      setWorkspaceRoot(selectedPath)
+      const tree = await window.api.listDir(selectedPath)
+      setFileTree(tree)
+    }
   }
 
   const handleFileSelect = async (filePath: string) => {
     const content = await window.api.readFile(filePath)
-    setFileContent(content)
-    setActiveFile(filePath)
+    openFile(filePath, content)
+  }
+
+  const handleNewFile = async () => {
+    const filePath = await window.api.newFile()
+    if (filePath) openFile(filePath, '')
   }
 
   useEffect(() => {
@@ -29,17 +38,84 @@ export default function App() {
     return cleanup
   }, [])
 
+  useEffect(() => {
+    const cleanup = window.api.onMenuNewFile(async () => {
+      const filePath = await window.api.newFile()
+      if (filePath) openFile(filePath, '')
+    })
+    return cleanup
+  }, [])
+
+  useEffect(() => {
+    const cleanup = window.api.onMenuRenameFile(async () => {
+      if (!activeFile) return
+      const newPath = await window.api.renameFile(activeFile)
+      if (newPath) setActiveFile(newPath)
+    })
+    return cleanup
+  }, [activeFile])
+
+  useEffect(() => {
+    const cleanup = window.api.onMenuDeleteFile(async () => {
+      if (!activeFile) return
+      const deleted = await window.api.deleteFile(activeFile)
+      if (deleted) setActiveFile(null)
+    })
+    return cleanup
+  }, [activeFile])
+
+  useEffect(() => {
+    const cleanup = window.api.onMenuToggleSidebar(() => setSidebarVisible((v) => !v))
+    return cleanup
+  }, [])
+
+  useEffect(() => {
+    const cleanup = window.api.onMenuToggleFocusMode(() => setSidebarVisible((v) => !v))
+    return cleanup
+  }, [])
+
+  useEffect(() => {
+    const cleanup = window.api.onMenuRevealInFinder(async () => {
+      if (!activeFile) return
+      await window.api.revealInFinder(activeFile)
+    })
+    return cleanup
+  }, [activeFile])
+
+  useEffect(() => {
+    const cleanup = window.api.onMenuDuplicateFile(async () => {
+      if (!activeFile) return
+      const newPath = await window.api.duplicateFile(activeFile)
+      if (newPath) {
+        const content = await window.api.readFile(newPath)
+        openFile(newPath, content)
+      }
+    })
+    return cleanup
+  }, [activeFile])
+
+  useEffect(() => {
+    const cleanup = window.api.onMenuMoveFile(async () => {
+      if (!activeFile) return
+      const newPath = await window.api.moveFile(activeFile)
+      if (newPath) setActiveFile(newPath)
+    })
+    return cleanup
+  }, [activeFile])
+
   return (
     <MilkdownProvider>
-      <div className="app">
+      <div className={`app${sidebarVisible ? '' : ' sidebar-hidden'}`}>
         <div className="app-body">
-          <aside className="sidebar">
-            <FileTree onOpenFolder={handleOpenFolder} onFileSelect={handleFileSelect} />
-          </aside>
+          {sidebarVisible && (
+            <aside className="sidebar">
+              <FileTree onOpenFolder={handleOpenFolder} onFileSelect={handleFileSelect} onNewFile={handleNewFile} />
+            </aside>
+          )}
           <main className="editor-area">
             <div className="titlebar-drag" />
             {activeFile ? (
-              <Editor key={activeFile} filePath={activeFile} initialContent={fileContent} />
+              <Editor key={activeFile} filePath={activeFile} initialContent={activeFileContent} />
             ) : (
               <div className="editor-empty">从左侧打开文件夹，选择一个 .md 文件开始编辑</div>
             )}
