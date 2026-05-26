@@ -95,10 +95,11 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
 
     const firstRowCells = rows[0]?.querySelectorAll('td, th') || []
     firstRowCells.forEach((cell, colIndex) => {
+      const cellEl = cell as HTMLElement
       const addColBtn = document.createElement('button')
       addColBtn.className = 'table-edge-btn table-add-col-btn'
       addColBtn.textContent = '+'
-      addColBtn.style.left = `${cell.offsetLeft + cell.offsetWidth / 2 - 10}px`
+      addColBtn.style.left = `${cellEl.offsetLeft + cellEl.offsetWidth / 2 - 10}px`
       addColBtn.style.transform = 'none'
       addColBtn.addEventListener('click', (e) => {
         e.preventDefault()
