@@ -36,6 +36,7 @@ import { markdownToDocxBuffer } from '../../lib/exporters/word'
 import { basename } from '../../lib/pathUtils'
 import { transformImagePath, restoreImagePath } from '../../lib/transformImagePath'
 import { TableDialog } from './TableDialog'
+import { TableEdgeButtons } from './TableEdgeButtons'
 
 import '@milkdown/prose/view/style/prosemirror.css'
 
@@ -53,6 +54,7 @@ export function Editor({ filePath, initialContent }: EditorProps) {
   const [showTableDialog, setShowTableDialog] = useState(false)
   const transformedContent = transformImagePath(initialContent, filePath)
   const sourceMdRef = useRef(initialContent)
+  const editorRef = useRef<HTMLDivElement>(null)
 
   const scheduleSave = useCallback(
     (markdown: string) => {
@@ -388,12 +390,14 @@ useEffect(() => {
   return (
     <div
       className="editor-wrapper"
+      ref={editorRef}
       onPaste={(e) => !sourceMode && handleImagePaste(e, filePath)}
       onDrop={(e) => !sourceMode && handleImageDrop(e, filePath)}
       onDragOver={(e) => e.preventDefault()}
     >
       <div style={{ display: sourceMode ? 'none' : undefined }}>
         <Milkdown />
+        {!sourceMode && <TableEdgeButtons editorRef={editorRef} getInstance={getInstance} />}
         {showTableDialog && (
           <TableDialog
             onConfirm={handleTableConfirm}
