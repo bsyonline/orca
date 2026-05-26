@@ -14,26 +14,30 @@ export function TableDialog({
   defaultRows = 3,
   defaultCols = 3,
 }: TableDialogProps) {
-  const [rows, setRows] = useState(defaultRows)
-  const [cols, setCols] = useState(defaultCols)
+  const [rows, setRows] = useState(String(defaultRows))
+  const [cols, setCols] = useState(String(defaultCols))
   const [error, setError] = useState<string | null>(null)
   const rowsInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     rowsInputRef.current?.focus()
+    rowsInputRef.current?.select()
   }, [])
 
   const handleSubmit = () => {
-    if (rows < 1 || rows > 10) {
+    const rowsNum = parseInt(rows)
+    const colsNum = parseInt(cols)
+
+    if (!rows || rowsNum < 1 || rowsNum > 10) {
       setError('行数超出范围，请输入1-10')
       return
     }
-    if (cols < 1 || cols > 10) {
+    if (!cols || colsNum < 1 || colsNum > 10) {
       setError('列数超出范围，请输入1-10')
       return
     }
     setError(null)
-    onConfirm(rows, cols)
+    onConfirm(rowsNum, colsNum)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -57,7 +61,7 @@ export function TableDialog({
               min={1}
               max={10}
               value={rows}
-              onChange={(e) => setRows(parseInt(e.target.value) || 1)}
+              onChange={(e) => setRows(e.target.value)}
             />
           </label>
           <label>
@@ -67,7 +71,7 @@ export function TableDialog({
               min={1}
               max={10}
               value={cols}
-              onChange={(e) => setCols(parseInt(e.target.value) || 1)}
+              onChange={(e) => setCols(e.target.value)}
             />
           </label>
         </div>
