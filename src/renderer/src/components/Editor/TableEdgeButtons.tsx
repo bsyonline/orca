@@ -138,6 +138,9 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
         if (mutation.type === 'childList') {
           mutation.addedNodes.forEach((node) => {
             if (node instanceof HTMLElement) {
+              if ((node as HTMLElement).classList.contains('table-edge-container')) {
+                return
+              }
               if (node.tagName === 'TABLE') {
                 wrapTable(node)
               } else {
