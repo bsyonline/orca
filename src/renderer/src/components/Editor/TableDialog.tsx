@@ -25,11 +25,11 @@ export function TableDialog({
 
   const handleSubmit = () => {
     if (rows < 1 || rows > 10) {
-      setError('行数必须在 1-10 之间')
+      setError('行数超出范围，请输入1-10')
       return
     }
     if (cols < 1 || cols > 10) {
-      setError('列数必须在 1-10 之间')
+      setError('列数超出范围，请输入1-10')
       return
     }
     setError(null)
@@ -46,8 +46,8 @@ export function TableDialog({
 
   return (
     <div className="table-dialog-overlay" onClick={onCancel}>
-      <div className="table-dialog" onClick={(e) => e.stopPropagation()} onKeyDown={handleKeyDown}>
-        <h3>插入表格</h3>
+      <div className="table-dialog" role="dialog" aria-modal="true" aria-labelledby="table-dialog-title" onClick={(e) => e.stopPropagation()} onKeyDown={handleKeyDown}>
+        <h3 id="table-dialog-title">插入表格</h3>
         <div className="table-dialog-inputs">
           <label>
             行数：
