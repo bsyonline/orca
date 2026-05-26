@@ -52,7 +52,7 @@
 }
 
 .table-add-col-btn:hover {
-  transform: translateX(-50%) scale(1.1);
+  transform: scale(1.1);
 }
 
 .table-delete-btn {

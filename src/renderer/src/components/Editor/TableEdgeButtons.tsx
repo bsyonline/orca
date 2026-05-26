@@ -2,6 +2,8 @@ import './TableEdgeButtons.css'
 import { useEffect, useRef, useCallback } from 'react'
 import { callCommand } from '@milkdown/kit/utils'
 import { addRowAfterCommand, addColAfterCommand } from '@milkdown/kit/preset/gfm'
+import { editorViewCtx } from '@milkdown/kit/core'
+import { TextSelection } from '@milkdown/kit/prose/state'
 
 interface TableEdgeButtonsProps {
   editorRef: React.RefObject<HTMLDivElement>
@@ -11,6 +13,100 @@ interface TableEdgeButtonsProps {
 export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsProps) {
   const tablesRef = useRef<Set<HTMLElement>>(new Set())
   const buttonsRef = useRef<Map<HTMLElement, HTMLElement>>(new Map())
+
+  const setSelectionToCell = useCallback((table: HTMLElement, rowIndex: number, colIndex: number) => {
+    const instance = getInstance()
+    if (!instance) return false
+
+    instance.action((ctx) => {
+      const view = ctx.get(editorViewCtx)
+      if (!view) return
+      
+      const tablePos = view.posAtDOM(table, 0)
+      if (tablePos < 0) return
+
+      const $tablePos = view.state.doc.resolve(tablePos)
+      let tableNodePos = -1
+      for (let d = $tablePos.depth; d >= 0; d--) {
+        const node = $tablePos.node(d)
+        if (node.type.name === 'table') {
+          tableNodePos = $tablePos.before(d)
+          break
+        }
+      }
+      if (tableNodePos < 0) return
+
+      const tableNode = view.state.doc.nodeAt(tableNodePos)
+      if (!tableNode) return
+
+      let cellPos = tableNodePos + 1
+      for (let r = 0; r <= rowIndex && r < tableNode.childCount; r++) {
+        const rowNode = tableNode.child(r)
+        if (r < rowIndex) {
+          cellPos += rowNode.nodeSize
+        } else {
+          cellPos += 1
+          for (let c = 0; c <= colIndex && c < rowNode.childCount; c++) {
+            const cellNode = rowNode.child(c)
+            if (c < colIndex) {
+              cellPos += cellNode.nodeSize
+            } else {
+              cellPos += 1
+            }
+          }
+        }
+      }
+
+      const tr = view.state.tr.setSelection(TextSelection.create(view.state.doc, cellPos))
+      view.dispatch(tr)
+    })
+    return true
+  }, [getInstance])
+
+  const handleAddRow = useCallback((table: HTMLElement, rowIndex: number) => {
+    if (!setSelectionToCell(table, rowIndex, 0)) return
+    const instance = getInstance()
+    if (!instance) return
+    instance.action(callCommand(addRowAfterCommand.key))
+  }, [getInstance, setSelectionToCell])
+
+  const handleAddCol = useCallback((table: HTMLElement, colIndex: number) => {
+    if (!setSelectionToCell(table, 0, colIndex)) return
+    const instance = getInstance()
+    if (!instance) return
+    instance.action(callCommand(addColAfterCommand.key))
+  }, [getInstance, setSelectionToCell])
+
+  const updateButtons = useCallback((table: HTMLElement, container: HTMLElement) => {
+    container.innerHTML = ''
+
+    const rows = table.querySelectorAll('tr')
+    rows.forEach((row, rowIndex) => {
+      const addRowBtn = document.createElement('button')
+      addRowBtn.className = 'table-edge-btn table-add-row-btn'
+      addRowBtn.textContent = '+'
+      addRowBtn.style.top = `${row.offsetTop + row.offsetHeight / 2 - 10}px`
+      addRowBtn.addEventListener('click', (e) => {
+        e.preventDefault()
+        handleAddRow(table, rowIndex)
+      })
+      container.appendChild(addRowBtn)
+    })
+
+    const firstRowCells = rows[0]?.querySelectorAll('td, th') || []
+    firstRowCells.forEach((cell, colIndex) => {
+      const addColBtn = document.createElement('button')
+      addColBtn.className = 'table-edge-btn table-add-col-btn'
+      addColBtn.textContent = '+'
+      addColBtn.style.left = `${cell.offsetLeft + cell.offsetWidth / 2 - 10}px`
+      addColBtn.style.transform = 'none'
+      addColBtn.addEventListener('click', (e) => {
+        e.preventDefault()
+        handleAddCol(table, colIndex)
+      })
+      container.appendChild(addColBtn)
+    })
+  }, [handleAddRow, handleAddCol])
 
   const wrapTable = useCallback((table: HTMLElement) => {
     if (tablesRef.current.has(table)) return
@@ -27,49 +123,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     buttonsRef.current.set(table, buttonsContainer)
 
     updateButtons(table, buttonsContainer)
-  }, [])
-
-  const updateButtons = useCallback((table: HTMLElement, container: HTMLElement) => {
-    container.innerHTML = ''
-
-    const rows = table.querySelectorAll('tr')
-    rows.forEach((row, rowIndex) => {
-      const addRowBtn = document.createElement('button')
-      addRowBtn.className = 'table-edge-btn table-add-row-btn'
-      addRowBtn.textContent = '+'
-      addRowBtn.style.top = `${row.offsetTop + row.offsetHeight / 2 - 10}px`
-      addRowBtn.addEventListener('click', (e) => {
-        e.preventDefault()
-        handleAddRow(rowIndex)
-      })
-      container.appendChild(addRowBtn)
-    })
-
-    const colCount = rows[0]?.querySelectorAll('td, th').length || 0
-    for (let colIndex = 0; colIndex < colCount; colIndex++) {
-      const addColBtn = document.createElement('button')
-      addColBtn.className = 'table-edge-btn table-add-col-btn'
-      addColBtn.textContent = '+'
-      addColBtn.style.left = `${table.offsetWidth / 2 - 10}px`
-      addColBtn.addEventListener('click', (e) => {
-        e.preventDefault()
-        handleAddCol(colIndex)
-      })
-      container.appendChild(addColBtn)
-    }
-  }, [])
-
-  const handleAddRow = useCallback((_rowIndex: number) => {
-    const instance = getInstance()
-    if (!instance) return
-    instance.action(callCommand(addRowAfterCommand.key))
-  }, [getInstance])
-
-  const handleAddCol = useCallback((_colIndex: number) => {
-    const instance = getInstance()
-    if (!instance) return
-    instance.action(callCommand(addColAfterCommand.key))
-  }, [getInstance])
+  }, [updateButtons])
 
   useEffect(() => {
     const editor = editorRef.current
