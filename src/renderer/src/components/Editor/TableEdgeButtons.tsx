@@ -130,36 +130,27 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     const editor = editorRef.current
     if (!editor) return
 
+    let processing = false
+
     const processTables = () => {
-      const tables = editor.querySelectorAll('table')
-      tables.forEach((table) => {
-        if (!tablesRef.current.has(table as HTMLElement)) {
-          wrapTable(table as HTMLElement)
-        }
-      })
+      if (processing) return
+      processing = true
+
+      setTimeout(() => {
+        const tables = editor.querySelectorAll('table:not(.table-edge-container table)')
+        tables.forEach((table) => {
+          if (!tablesRef.current.has(table as HTMLElement)) {
+            wrapTable(table as HTMLElement)
+          }
+        })
+        processing = false
+      }, 100)
     }
 
     processTables()
 
-    const observer = new MutationObserver((mutations) => {
-      let hasTableMutation = false
-      for (const mutation of mutations) {
-        if (mutation.type === 'childList') {
-          mutation.addedNodes.forEach((node) => {
-            if (node instanceof HTMLElement) {
-              if (node.classList.contains('table-edge-container')) {
-                return
-              }
-              if (node.tagName === 'TABLE' || node.querySelector('table')) {
-                hasTableMutation = true
-              }
-            }
-          })
-        }
-      }
-      if (hasTableMutation) {
-        processTables()
-      }
+    const observer = new MutationObserver(() => {
+      processTables()
     })
 
     observer.observe(editor, { childList: true, subtree: true })
