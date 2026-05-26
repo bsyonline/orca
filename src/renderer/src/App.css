@@ -1,24 +1,66 @@
 :root {
   --sidebar-width: 240px;
-  --sidebar-bg: #f5f5f5;
-  --sidebar-border: #e0e0e0;
-  --editor-bg: #ffffff;
-  --text-primary: #1a1a1a;
-  --text-secondary: #666666;
-  --accent: #2563eb;
-  --statusbar-bg: #f0f0f0;
+
+  --bg-page:    #F7F4EC;
+  --bg-subtle:  #EFEBE0;
+  --bg-sidebar: #F7F4EC;
+  --bg-code:    #F0ECDF;
+
+  --ink:        #3A3833;
+  --ink-2:      #6B6862;
+  --ink-3:      #A09C92;
+
+  --border-sub: rgba(58, 56, 51, 0.08);
+  --border-def: rgba(58, 56, 51, 0.14);
+
+  --accent:           #3A3833;
+  --accent-hi:        #4A4843;
+  --accent-ink:       #3A3833;
+  --accent-soft:      rgba(58, 56, 51, 0.06);
+  --accent-soft-strong: rgba(58, 56, 51, 0.10);
+
+  --danger:           #dc3545;
+  --danger-soft:        rgba(220, 53, 69, 0.15);
+  --danger-border:      rgba(220, 53, 69, 0.3);
+  --danger-text:        rgba(220, 53, 69, 0.8);
+  --danger-hover:       rgba(220, 53, 69, 0.25);
+
+  --danger:           #dc3545;
+  --danger-soft:      rgba(220, 53, 69, 0.15);
+  --danger-border:    rgba(220, 53, 69, 0.3);
+  --danger-text:      rgba(220, 53, 69, 0.8);
+  --danger-hover:     rgba(220, 53, 69, 0.25);
+
+  /* legacy aliases used by sub-components */
+  --sidebar-bg:      var(--bg-sidebar);
+  --sidebar-border:  var(--border-sub);
+  --editor-bg:       var(--bg-page);
+  --text-primary:    var(--ink);
+  --text-secondary:  var(--ink-2);
+  --statusbar-bg:    var(--bg-page);
   --statusbar-height: 24px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--editor-bg);
-  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', sans-serif;
+  background: var(--bg-page);
+  color: var(--ink);
   height: 100vh;
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  background-image: none;
 }
+
+*::-webkit-scrollbar { width: 8px; }
+*::-webkit-scrollbar-thumb { background: rgba(58, 56, 51, 0.10); border-radius: 999px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(58, 56, 51, 0.18); }
+*::-webkit-scrollbar-track { background: transparent; }
+
+button { font-family: inherit; }
+::selection { background: rgba(58, 56, 51, 0.14); }
 
 .app { display: flex; flex-direction: column; height: 100vh; }
 .app-body { display: flex; flex: 1; overflow: hidden; }
@@ -26,12 +68,20 @@ body {
 .sidebar {
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
-  background: var(--sidebar-bg);
-  border-right: 1px solid var(--sidebar-border);
-  overflow-y: auto;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-sub);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.editor-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; padding-top: 38px; }
+.editor-area {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-top: 38px;
+}
 
 .titlebar-drag {
   position: fixed;
@@ -43,11 +93,13 @@ body {
   z-index: 10;
 }
 
+.sidebar-hidden .titlebar-drag { left: 0; }
+
 .editor-empty {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--text-secondary);
+  color: var(--ink-3);
   font-size: 14px;
 }
