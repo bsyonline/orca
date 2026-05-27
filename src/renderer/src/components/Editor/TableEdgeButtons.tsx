@@ -188,6 +188,12 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     buttonsRef.current.set(table, buttonsContainer)
 
     updateButtons(table, buttonsContainer)
+
+    const observer = new MutationObserver(() => {
+      setTimeout(() => updateButtons(table, buttonsContainer), 100)
+    })
+    observer.observe(table, { childList: true, subtree: true })
+    observersRef.current.set(table, observer)
   }, [updateButtons])
 
   useEffect(() => {
@@ -210,7 +216,13 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     const handleTableAdded = () => processTables()
     window.addEventListener('oraca-table-added', handleTableAdded)
     
-    return () => window.removeEventListener('oraca-table-added', handleTableAdded)
+    return () => {
+      window.removeEventListener('oraca-table-added', handleTableAdded)
+      observersRef.current.forEach((observer) => observer.disconnect())
+      observersRef.current.clear()
+      abortControllersRef.current.forEach((ac) => ac.abort())
+      abortControllersRef.current.clear()
+    }
   }, [editorRef, wrapTable])
 
   return null
