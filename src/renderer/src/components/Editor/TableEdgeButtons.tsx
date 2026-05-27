@@ -79,6 +79,20 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     instance.action(callCommand(addColAfterCommand.key))
   }, [getInstance, setSelectionToCell])
 
+  const handleDeleteRow = useCallback((table: HTMLElement, rowIndex: number) => {
+    if (!setSelectionToCell(table, rowIndex, 0)) return
+    const instance = getInstance()
+    if (!instance) return
+    instance.action(callCommand(deleteSelectedCellsCommand.key))
+  }, [getInstance, setSelectionToCell])
+
+  const handleDeleteCol = useCallback((table: HTMLElement, colIndex: number) => {
+    if (!setSelectionToCell(table, 0, colIndex)) return
+    const instance = getInstance()
+    if (!instance) return
+    instance.action(callCommand(deleteSelectedCellsCommand.key))
+  }, [getInstance, setSelectionToCell])
+
   const updateButtons = useCallback((table: HTMLElement, container: HTMLElement) => {
     container.innerHTML = ''
 
