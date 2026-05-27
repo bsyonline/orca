@@ -103,103 +103,130 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     const colCount = firstRowCells.length
     const tableRect = table.getBoundingClientRect()
 
+    // Build row buttons
+    type BtnPair = { add: HTMLButtonElement; del: HTMLButtonElement }
+    const rowBtns: BtnPair[] = []
     rows.forEach((row, rowIndex) => {
-      const rowEl = row as HTMLElement
-      const rowRect = rowEl.getBoundingClientRect()
+      const rowRect = (row as HTMLElement).getBoundingClientRect()
       const rowTop = rowRect.top - tableRect.top
       const rowBottom = rowRect.bottom - tableRect.top
 
-      const addRowBtn = document.createElement('button')
-      addRowBtn.type = 'button'
-      addRowBtn.className = 'table-edge-btn table-add-row-btn'
-      addRowBtn.textContent = '+'
-      addRowBtn.style.top = `${rowBottom - 10}px`
-      addRowBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddRow(table, rowIndex) })
-      overlay.appendChild(addRowBtn)
+      const addBtn = document.createElement('button')
+      addBtn.type = 'button'
+      addBtn.className = 'table-edge-btn table-add-row-btn'
+      addBtn.textContent = '+'
+      addBtn.style.top = `${rowBottom - 10}px`
+      addBtn.style.opacity = '0'
+      addBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddRow(table, rowIndex) })
+      overlay.appendChild(addBtn)
 
-      const delRowBtn = document.createElement('button')
-      delRowBtn.type = 'button'
-      delRowBtn.className = 'table-edge-btn table-delete-btn table-delete-row-btn'
-      delRowBtn.textContent = '−'
-      delRowBtn.style.top = `${rowTop + (rowBottom - rowTop) / 2 - 10}px`
-      if (rowCount <= 1) delRowBtn.classList.add('table-edge-btn-disabled')
-      delRowBtn.addEventListener('click', (e) => { e.preventDefault(); if (rowCount > 1) handleDeleteRow(table, rowIndex) })
-      overlay.appendChild(delRowBtn)
+      const delBtn = document.createElement('button')
+      delBtn.type = 'button'
+      delBtn.className = 'table-edge-btn table-delete-btn table-delete-row-btn'
+      delBtn.textContent = '−'
+      delBtn.style.top = `${rowTop + (rowBottom - rowTop) / 2 - 10}px`
+      delBtn.style.opacity = '0'
+      if (rowCount <= 1) delBtn.classList.add('table-edge-btn-disabled')
+      delBtn.addEventListener('click', (e) => { e.preventDefault(); if (rowCount > 1) handleDeleteRow(table, rowIndex) })
+      overlay.appendChild(delBtn)
 
-      addRowBtn.style.opacity = '0'
-
-      // 300ms grace period so mouse can travel from row to button without hide firing
-      let rowTimer: ReturnType<typeof setTimeout> | null = null
-      const showRow = () => {
-        if (rowTimer) { clearTimeout(rowTimer); rowTimer = null }
-        addRowBtn.style.opacity = '1'
-        delRowBtn.style.opacity = rowCount <= 1 ? '0' : '1'
-      }
-      const hideRow = () => {
-        rowTimer = setTimeout(() => {
-          addRowBtn.style.opacity = '0'
-          delRowBtn.style.opacity = '0'
-          rowTimer = null
-        }, 50)
-      }
-      rowEl.addEventListener('mouseenter', showRow, { signal })
-      rowEl.addEventListener('mouseleave', hideRow, { signal })
-      addRowBtn.addEventListener('mouseenter', showRow)
-      addRowBtn.addEventListener('mouseleave', hideRow)
-      delRowBtn.addEventListener('mouseenter', showRow)
-      delRowBtn.addEventListener('mouseleave', hideRow)
+      rowBtns.push({ add: addBtn, del: delBtn })
     })
 
+    // Build col buttons
+    const colBtns: BtnPair[] = []
     firstRowCells.forEach((cell, colIndex) => {
-      const cellEl = cell as HTMLElement
-      const cellRect = cellEl.getBoundingClientRect()
+      const cellRect = (cell as HTMLElement).getBoundingClientRect()
       const colLeft = cellRect.left - tableRect.left
       const colRight = cellRect.right - tableRect.left
 
-      const addColBtn = document.createElement('button')
-      addColBtn.type = 'button'
-      addColBtn.className = 'table-edge-btn table-add-col-btn'
-      addColBtn.textContent = '+'
-      addColBtn.style.left = `${colRight - 10}px`
-      addColBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddCol(table, colIndex) })
-      overlay.appendChild(addColBtn)
+      const addBtn = document.createElement('button')
+      addBtn.type = 'button'
+      addBtn.className = 'table-edge-btn table-add-col-btn'
+      addBtn.textContent = '+'
+      addBtn.style.left = `${colRight - 10}px`
+      addBtn.style.opacity = '0'
+      addBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddCol(table, colIndex) })
+      overlay.appendChild(addBtn)
 
-      const delColBtn = document.createElement('button')
-      delColBtn.type = 'button'
-      delColBtn.className = 'table-edge-btn table-delete-btn table-delete-col-btn'
-      delColBtn.textContent = '−'
-      delColBtn.style.left = `${colLeft + (colRight - colLeft) / 2 - 10}px`
-      if (colCount <= 1) delColBtn.classList.add('table-edge-btn-disabled')
-      delColBtn.addEventListener('click', (e) => { e.preventDefault(); if (colCount > 1) handleDeleteCol(table, colIndex) })
-      overlay.appendChild(delColBtn)
+      const delBtn = document.createElement('button')
+      delBtn.type = 'button'
+      delBtn.className = 'table-edge-btn table-delete-btn table-delete-col-btn'
+      delBtn.textContent = '−'
+      delBtn.style.left = `${colLeft + (colRight - colLeft) / 2 - 10}px`
+      delBtn.style.opacity = '0'
+      if (colCount <= 1) delBtn.classList.add('table-edge-btn-disabled')
+      delBtn.addEventListener('click', (e) => { e.preventDefault(); if (colCount > 1) handleDeleteCol(table, colIndex) })
+      overlay.appendChild(delBtn)
 
-      addColBtn.style.opacity = '0'
+      colBtns.push({ add: addBtn, del: delBtn })
+    })
 
-      let colTimer: ReturnType<typeof setTimeout> | null = null
-      const showCol = () => {
-        if (colTimer) { clearTimeout(colTimer); colTimer = null }
-        addColBtn.style.opacity = '1'
-        delColBtn.style.opacity = colCount <= 1 ? '0' : '1'
-      }
-      const hideCol = () => {
-        colTimer = setTimeout(() => {
-          addColBtn.style.opacity = '0'
-          delColBtn.style.opacity = '0'
-          colTimer = null
-        }, 50)
-      }
-      // Watch all cells in this column (not just first row)
-      rows.forEach((row) => {
-        const colCell = row.querySelectorAll('td, th')[colIndex] as HTMLElement | undefined
-        if (colCell) {
-          colCell.addEventListener('mouseenter', showCol, { signal })
-          colCell.addEventListener('mouseleave', hideCol, { signal })
-        }
+    // Coordinate-based hover: use mousemove on <table> so ProseMirror <tr> replacements don't break it
+    let activeRow = -1
+    let activeCol = -1
+    let hideTimer: ReturnType<typeof setTimeout> | null = null
+
+    const setRow = (i: number) => {
+      if (i === activeRow) return
+      activeRow = i
+      rowBtns.forEach(({ add, del }, idx) => {
+        add.style.opacity = idx === i ? '1' : '0'
+        del.style.opacity = idx === i && rowCount > 1 ? '1' : '0'
       })
-      addColBtn.addEventListener('mouseenter', showCol)
-      addColBtn.addEventListener('mouseleave', hideCol)
-      delColBtn.addEventListener('mouseenter', showCol)
-      delColBtn.addEventListener('mouseleave', hideCol)
+    }
+    const setCol = (i: number) => {
+      if (i === activeCol) return
+      activeCol = i
+      colBtns.forEach(({ add, del }, idx) => {
+        add.style.opacity = idx === i ? '1' : '0'
+        del.style.opacity = idx === i && colCount > 1 ? '1' : '0'
+      })
+    }
+    const hideAll = () => {
+      if (hideTimer) clearTimeout(hideTimer)
+      hideTimer = setTimeout(() => {
+        activeRow = -1; activeCol = -1
+        rowBtns.forEach(({ add, del }) => { add.style.opacity = '0'; del.style.opacity = '0' })
+        colBtns.forEach(({ add, del }) => { add.style.opacity = '0'; del.style.opacity = '0' })
+        hideTimer = null
+      }, 80)
+    }
+    const cancelHide = () => { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null } }
+
+    table.addEventListener('mousemove', (e) => {
+      cancelHide()
+      // Detect row by Y coordinate
+      let row = -1
+      table.querySelectorAll('tr').forEach((tr, i) => {
+        const r = (tr as HTMLElement).getBoundingClientRect()
+        if (e.clientY >= r.top && e.clientY <= r.bottom) row = i
+      })
+      // Detect col by X coordinate using first row cells
+      let col = -1
+      const cells = table.querySelectorAll('tr')[0]?.querySelectorAll('td, th') || []
+      cells.forEach((td, i) => {
+        const r = (td as HTMLElement).getBoundingClientRect()
+        if (e.clientX >= r.left && e.clientX <= r.right) col = i
+      })
+      setRow(row)
+      setCol(col)
+    }, { signal })
+
+    table.addEventListener('mouseleave', hideAll, { signal })
+
+    // Keep buttons visible when cursor moves from table edge to button
+    rowBtns.forEach(({ add, del }) => {
+      add.addEventListener('mouseenter', cancelHide)
+      del.addEventListener('mouseenter', cancelHide)
+      add.addEventListener('mouseleave', hideAll)
+      del.addEventListener('mouseleave', hideAll)
+    })
+    colBtns.forEach(({ add, del }) => {
+      add.addEventListener('mouseenter', cancelHide)
+      del.addEventListener('mouseenter', cancelHide)
+      add.addEventListener('mouseleave', hideAll)
+      del.addEventListener('mouseleave', hideAll)
     })
   }, [handleAddRow, handleAddCol, handleDeleteRow, handleDeleteCol])
 
