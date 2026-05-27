@@ -6,6 +6,8 @@
 }
 
 .table-edge-btn {
+  -webkit-appearance: none;
+  appearance: none;
   position: absolute;
   width: 20px;
   height: 20px;
@@ -13,10 +15,10 @@
   border-radius: 50%;
   background: var(--border-sub);
   border: 1px solid var(--border-def);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   padding: 0;
+  margin: 0;
   line-height: 1;
   font-size: 13px;
   font-weight: 400;
