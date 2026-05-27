@@ -33,7 +33,7 @@
   color: var(--ink-3);
   cursor: pointer;
   pointer-events: auto;
-  transition: background 0.15s ease, transform 0.15s ease;
+  transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
 }
 
 .table-edge-btn:hover {
@@ -63,4 +63,20 @@
 
 .table-delete-btn:hover {
   background: var(--danger-hover);
+}
+
+.table-delete-row-btn {
+  left: -25px;
+  opacity: 0;
+}
+
+.table-delete-col-btn {
+  top: -25px;
+  opacity: 0;
+}
+
+.table-edge-btn-disabled {
+  opacity: 0.25 !important;
+  cursor: not-allowed;
+  pointer-events: none;
 }
