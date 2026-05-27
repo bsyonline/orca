@@ -1,7 +1,7 @@
 import './TableEdgeButtons.css'
 import { useEffect, useRef, useCallback } from 'react'
 import { callCommand } from '@milkdown/kit/utils'
-import { addRowAfterCommand, addColAfterCommand } from '@milkdown/kit/preset/gfm'
+import { addRowAfterCommand, addColAfterCommand, deleteSelectedCellsCommand } from '@milkdown/kit/preset/gfm'
 import { editorViewCtx } from '@milkdown/kit/core'
 import { TextSelection } from '@milkdown/kit/prose/state'
 
@@ -13,6 +13,8 @@ interface TableEdgeButtonsProps {
 export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsProps) {
   const tablesRef = useRef<Set<HTMLElement>>(new Set())
   const buttonsRef = useRef<Map<HTMLElement, HTMLElement>>(new Map())
+  const observersRef = useRef<Map<HTMLElement, MutationObserver>>(new Map())
+  const abortControllersRef = useRef<Map<HTMLElement, AbortController>>(new Map())
 
   const setSelectionToCell = useCallback((table: HTMLElement, rowIndex: number, colIndex: number) => {
     const instance = getInstance()
@@ -130,12 +132,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     const editor = editorRef.current
     if (!editor) return
 
-    let processing = false
-
     const processTables = () => {
-      if (processing) return
-      processing = true
-
       setTimeout(() => {
         const tables = editor.querySelectorAll('table:not(.table-edge-container table)')
         tables.forEach((table) => {
@@ -143,18 +140,15 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
             wrapTable(table as HTMLElement)
           }
         })
-        processing = false
-      }, 100)
+      }, 50)
     }
 
     processTables()
 
-    const observer = new MutationObserver(() => {
-      processTables()
-    })
-
-    observer.observe(editor, { childList: true, subtree: true })
-    return () => observer.disconnect()
+    const handleTableAdded = () => processTables()
+    window.addEventListener('oraca-table-added', handleTableAdded)
+    
+    return () => window.removeEventListener('oraca-table-added', handleTableAdded)
   }, [editorRef, wrapTable])
 
   return null
