@@ -189,8 +189,15 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
 
     updateButtons(table, buttonsContainer)
 
-    const observer = new MutationObserver(() => {
-      setTimeout(() => updateButtons(table, buttonsContainer), 100)
+    const STRUCTURAL_TAGS = new Set(['TR', 'TD', 'TH', 'TBODY', 'THEAD'])
+    const observer = new MutationObserver((mutations) => {
+      const isStructural = mutations.some((m) =>
+        m.type === 'childList' &&
+        [...m.addedNodes, ...m.removedNodes].some(
+          (n) => n instanceof HTMLElement && STRUCTURAL_TAGS.has(n.tagName)
+        )
+      )
+      if (isStructural) setTimeout(() => updateButtons(table, buttonsContainer), 100)
     })
     observer.observe(table, { childList: true, subtree: true })
     observersRef.current.set(table, observer)
@@ -217,8 +224,12 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
 
     processTables()
 
-    const editorObserver = new MutationObserver(() => {
-      processTables()
+    const editorObserver = new MutationObserver((mutations) => {
+      const hasNewTable = mutations.some((m) =>
+        m.type === 'childList' &&
+        [...m.addedNodes].some((n) => n instanceof HTMLElement && (n.tagName === 'TABLE' || n.querySelector?.('table')))
+      )
+      if (hasNewTable) processTables()
     })
     editorObserver.observe(editor, { childList: true, subtree: true })
 
