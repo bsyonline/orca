@@ -200,7 +200,10 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     const editor = editorRef.current
     if (!editor) return
 
+    let processing = false
     const processTables = () => {
+      if (processing) return
+      processing = true
       setTimeout(() => {
         const tables = editor.querySelectorAll('table:not(.table-edge-container table)')
         tables.forEach((table) => {
@@ -208,16 +211,19 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
             wrapTable(table as HTMLElement)
           }
         })
+        processing = false
       }, 50)
     }
 
     processTables()
 
-    const handleTableAdded = () => processTables()
-    window.addEventListener('oraca-table-added', handleTableAdded)
-    
+    const editorObserver = new MutationObserver(() => {
+      processTables()
+    })
+    editorObserver.observe(editor, { childList: true, subtree: true })
+
     return () => {
-      window.removeEventListener('oraca-table-added', handleTableAdded)
+      editorObserver.disconnect()
       observersRef.current.forEach((observer) => observer.disconnect())
       observersRef.current.clear()
       abortControllersRef.current.forEach((ac) => ac.abort())
