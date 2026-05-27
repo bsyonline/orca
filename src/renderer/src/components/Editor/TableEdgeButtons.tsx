@@ -1,9 +1,10 @@
 import './TableEdgeButtons.css'
 import { useEffect, useRef, useCallback } from 'react'
 import { callCommand } from '@milkdown/kit/utils'
-import { addRowAfterCommand, addColAfterCommand, deleteSelectedCellsCommand } from '@milkdown/kit/preset/gfm'
+import { addRowAfterCommand, addColAfterCommand } from '@milkdown/kit/preset/gfm'
 import { editorViewCtx } from '@milkdown/kit/core'
 import { TextSelection } from '@milkdown/kit/prose/state'
+import { deleteRow, deleteColumn } from '@milkdown/prose/tables'
 
 interface TableEdgeButtonsProps {
   editorRef: React.RefObject<HTMLDivElement>
@@ -63,12 +64,18 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
 
   const handleDeleteRow = useCallback((table: HTMLElement, rowIndex: number) => {
     if (!setSelectionToCell(table, rowIndex, 0)) return
-    getInstance()?.action(callCommand(deleteSelectedCellsCommand.key))
+    getInstance()?.action((ctx) => {
+      const view = ctx.get(editorViewCtx)
+      if (view) deleteRow(view.state, view.dispatch)
+    })
   }, [getInstance, setSelectionToCell])
 
   const handleDeleteCol = useCallback((table: HTMLElement, colIndex: number) => {
     if (!setSelectionToCell(table, 0, colIndex)) return
-    getInstance()?.action(callCommand(deleteSelectedCellsCommand.key))
+    getInstance()?.action((ctx) => {
+      const view = ctx.get(editorViewCtx)
+      if (view) deleteColumn(view.state, view.dispatch)
+    })
   }, [getInstance, setSelectionToCell])
 
   const positionOverlay = useCallback((table: HTMLElement, overlay: HTMLElement) => {
@@ -107,7 +114,6 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       addRowBtn.className = 'table-edge-btn table-add-row-btn'
       addRowBtn.textContent = '+'
       addRowBtn.style.top = `${rowBottom - 10}px`
-      addRowBtn.style.opacity = '0'
       addRowBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddRow(table, rowIndex) })
       overlay.appendChild(addRowBtn)
 
@@ -116,12 +122,13 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       delRowBtn.className = 'table-edge-btn table-delete-btn table-delete-row-btn'
       delRowBtn.textContent = '−'
       delRowBtn.style.top = `${rowTop + (rowBottom - rowTop) / 2 - 10}px`
-      delRowBtn.style.opacity = '0'
       if (rowCount <= 1) delRowBtn.classList.add('table-edge-btn-disabled')
       delRowBtn.addEventListener('click', (e) => { e.preventDefault(); if (rowCount > 1) handleDeleteRow(table, rowIndex) })
       overlay.appendChild(delRowBtn)
 
-      // 300ms delay so mouse can travel from row to button without disappearing
+      addRowBtn.style.opacity = '0'
+
+      // 300ms grace period so mouse can travel from row to button without hide firing
       let rowTimer: ReturnType<typeof setTimeout> | null = null
       const showRow = () => {
         if (rowTimer) { clearTimeout(rowTimer); rowTimer = null }
@@ -133,7 +140,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
           addRowBtn.style.opacity = '0'
           delRowBtn.style.opacity = '0'
           rowTimer = null
-        }, 300)
+        }, 50)
       }
       rowEl.addEventListener('mouseenter', showRow, { signal })
       rowEl.addEventListener('mouseleave', hideRow, { signal })
@@ -154,7 +161,6 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       addColBtn.className = 'table-edge-btn table-add-col-btn'
       addColBtn.textContent = '+'
       addColBtn.style.left = `${colRight - 10}px`
-      addColBtn.style.opacity = '0'
       addColBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddCol(table, colIndex) })
       overlay.appendChild(addColBtn)
 
@@ -163,10 +169,11 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       delColBtn.className = 'table-edge-btn table-delete-btn table-delete-col-btn'
       delColBtn.textContent = '−'
       delColBtn.style.left = `${colLeft + (colRight - colLeft) / 2 - 10}px`
-      delColBtn.style.opacity = '0'
       if (colCount <= 1) delColBtn.classList.add('table-edge-btn-disabled')
       delColBtn.addEventListener('click', (e) => { e.preventDefault(); if (colCount > 1) handleDeleteCol(table, colIndex) })
       overlay.appendChild(delColBtn)
+
+      addColBtn.style.opacity = '0'
 
       let colTimer: ReturnType<typeof setTimeout> | null = null
       const showCol = () => {
@@ -179,7 +186,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
           addColBtn.style.opacity = '0'
           delColBtn.style.opacity = '0'
           colTimer = null
-        }, 300)
+        }, 50)
       }
       // Watch all cells in this column (not just first row)
       rows.forEach((row) => {
@@ -262,19 +269,15 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     }
 
     processTables()
+    const t1 = setTimeout(processTables, 200)
+    const t2 = setTimeout(processTables, 600)
+    const t3 = setTimeout(processTables, 1500)
 
-    const editorObserver = new MutationObserver((mutations) => {
-      const hasTableChange = mutations.some((m) =>
-        m.type === 'childList' &&
-        [...m.addedNodes, ...m.removedNodes].some(
-          (n) => n instanceof HTMLElement && (n.tagName === 'TABLE' || n.querySelector?.('table'))
-        )
-      )
-      if (hasTableChange) processTables()
-    })
+    const editorObserver = new MutationObserver(processTables)
     editorObserver.observe(editor, { childList: true, subtree: true })
 
     return () => {
+      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3)
       editorObserver.disconnect()
       observersRef.current.forEach((obs) => obs.disconnect())
       observersRef.current.clear()
