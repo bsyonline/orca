@@ -97,15 +97,19 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     const rowCount = rows.length
     const firstRowCells = rows[0]?.querySelectorAll('td, th') || []
     const colCount = firstRowCells.length
+    const tableRect = table.getBoundingClientRect()
 
     rows.forEach((row, rowIndex) => {
       const rowEl = row as HTMLElement
+      const rowRect = rowEl.getBoundingClientRect()
+      const rowTop = rowRect.top - tableRect.top
+      const rowBottom = rowRect.bottom - tableRect.top
 
       // + button sits on bottom border of row (= dividing line between rows)
       const addRowBtn = document.createElement('button')
       addRowBtn.className = 'table-edge-btn table-add-row-btn'
       addRowBtn.textContent = '+'
-      addRowBtn.style.top = `${rowEl.offsetTop + rowEl.offsetHeight - 10}px`
+      addRowBtn.style.top = `${rowBottom - 10}px`
       addRowBtn.style.opacity = '0'
       addRowBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddRow(table, rowIndex) })
       overlay.appendChild(addRowBtn)
@@ -113,7 +117,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       const delRowBtn = document.createElement('button')
       delRowBtn.className = 'table-edge-btn table-delete-btn table-delete-row-btn'
       delRowBtn.textContent = '−'
-      delRowBtn.style.top = `${rowEl.offsetTop + rowEl.offsetHeight / 2 - 10}px`
+      delRowBtn.style.top = `${rowTop + (rowBottom - rowTop) / 2 - 10}px`
       delRowBtn.style.opacity = '0'
       if (rowCount <= 1) delRowBtn.classList.add('table-edge-btn-disabled')
       delRowBtn.addEventListener('click', (e) => { e.preventDefault(); if (rowCount > 1) handleDeleteRow(table, rowIndex) })
@@ -143,12 +147,15 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
 
     firstRowCells.forEach((cell, colIndex) => {
       const cellEl = cell as HTMLElement
+      const cellRect = cellEl.getBoundingClientRect()
+      const colLeft = cellRect.left - tableRect.left
+      const colRight = cellRect.right - tableRect.left
 
       // + button sits on right border of column (= dividing line between columns)
       const addColBtn = document.createElement('button')
       addColBtn.className = 'table-edge-btn table-add-col-btn'
       addColBtn.textContent = '+'
-      addColBtn.style.left = `${cellEl.offsetLeft + cellEl.offsetWidth - 10}px`
+      addColBtn.style.left = `${colRight - 10}px`
       addColBtn.style.opacity = '0'
       addColBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddCol(table, colIndex) })
       overlay.appendChild(addColBtn)
@@ -156,7 +163,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       const delColBtn = document.createElement('button')
       delColBtn.className = 'table-edge-btn table-delete-btn table-delete-col-btn'
       delColBtn.textContent = '−'
-      delColBtn.style.left = `${cellEl.offsetLeft + cellEl.offsetWidth / 2 - 10}px`
+      delColBtn.style.left = `${colLeft + (colRight - colLeft) / 2 - 10}px`
       delColBtn.style.opacity = '0'
       if (colCount <= 1) delColBtn.classList.add('table-edge-btn-disabled')
       delColBtn.addEventListener('click', (e) => { e.preventDefault(); if (colCount > 1) handleDeleteCol(table, colIndex) })
