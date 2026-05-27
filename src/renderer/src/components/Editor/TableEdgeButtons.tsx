@@ -94,24 +94,55 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
   }, [getInstance, setSelectionToCell])
 
   const updateButtons = useCallback((table: HTMLElement, container: HTMLElement) => {
+    // 中止并替换上一轮的 hover 事件监听器
+    abortControllersRef.current.get(table)?.abort()
+    const ac = new AbortController()
+    abortControllersRef.current.set(table, ac)
+    const { signal } = ac
+
     container.innerHTML = ''
 
     const rows = table.querySelectorAll('tr')
+    const rowCount = rows.length
+    const firstRowCells = rows[0]?.querySelectorAll('td, th') || []
+    const colCount = firstRowCells.length
+
     rows.forEach((row, rowIndex) => {
+      const rowEl = row as HTMLElement
+
+      // 右侧"+"添加行按钮（现有逻辑）
       const addRowBtn = document.createElement('button')
       addRowBtn.className = 'table-edge-btn table-add-row-btn'
       addRowBtn.textContent = '+'
-      addRowBtn.style.top = `${row.offsetTop + row.offsetHeight / 2 - 10}px`
+      addRowBtn.style.top = `${rowEl.offsetTop + rowEl.offsetHeight / 2 - 10}px`
       addRowBtn.addEventListener('click', (e) => {
         e.preventDefault()
         handleAddRow(table, rowIndex)
       })
       container.appendChild(addRowBtn)
+
+      // 左侧"−"删除行按钮（新增）
+      const delRowBtn = document.createElement('button')
+      delRowBtn.className = 'table-edge-btn table-delete-btn table-delete-row-btn'
+      delRowBtn.textContent = '−'
+      delRowBtn.style.top = `${rowEl.offsetTop + rowEl.offsetHeight / 2 - 10}px`
+      if (rowCount <= 1) {
+        delRowBtn.classList.add('table-edge-btn-disabled')
+      }
+      delRowBtn.addEventListener('click', (e) => {
+        e.preventDefault()
+        if (rowCount > 1) handleDeleteRow(table, rowIndex)
+      })
+      container.appendChild(delRowBtn)
+
+      rowEl.addEventListener('mouseenter', () => { delRowBtn.style.opacity = '1' }, { signal })
+      rowEl.addEventListener('mouseleave', () => { delRowBtn.style.opacity = '0' }, { signal })
     })
 
-    const firstRowCells = rows[0]?.querySelectorAll('td, th') || []
     firstRowCells.forEach((cell, colIndex) => {
       const cellEl = cell as HTMLElement
+
+      // 底部"+"添加列按钮（现有逻辑）
       const addColBtn = document.createElement('button')
       addColBtn.className = 'table-edge-btn table-add-col-btn'
       addColBtn.textContent = '+'
@@ -122,8 +153,25 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
         handleAddCol(table, colIndex)
       })
       container.appendChild(addColBtn)
+
+      // 顶部"−"删除列按钮（新增）
+      const delColBtn = document.createElement('button')
+      delColBtn.className = 'table-edge-btn table-delete-btn table-delete-col-btn'
+      delColBtn.textContent = '−'
+      delColBtn.style.left = `${cellEl.offsetLeft + cellEl.offsetWidth / 2 - 10}px`
+      if (colCount <= 1) {
+        delColBtn.classList.add('table-edge-btn-disabled')
+      }
+      delColBtn.addEventListener('click', (e) => {
+        e.preventDefault()
+        if (colCount > 1) handleDeleteCol(table, colIndex)
+      })
+      container.appendChild(delColBtn)
+
+      cellEl.addEventListener('mouseenter', () => { delColBtn.style.opacity = '1' }, { signal })
+      cellEl.addEventListener('mouseleave', () => { delColBtn.style.opacity = '0' }, { signal })
     })
-  }, [handleAddRow, handleAddCol])
+  }, [handleAddRow, handleAddCol, handleDeleteRow, handleDeleteCol])
 
   const wrapTable = useCallback((table: HTMLElement) => {
     if (tablesRef.current.has(table)) return
