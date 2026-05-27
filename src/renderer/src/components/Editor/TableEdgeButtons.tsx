@@ -15,8 +15,6 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
   const overlaysRef = useRef<Map<HTMLElement, HTMLElement>>(new Map())
   const observersRef = useRef<Map<HTMLElement, MutationObserver>>(new Map())
   const buttonControllersRef = useRef<Map<HTMLElement, AbortController>>(new Map())
-  const hoverControllersRef = useRef<Map<HTMLElement, AbortController>>(new Map())
-  const hideTimersRef = useRef<Map<HTMLElement, ReturnType<typeof setTimeout>>>(new Map())
 
   const setSelectionToCell = useCallback((table: HTMLElement, rowIndex: number, colIndex: number) => {
     const instance = getInstance()
@@ -73,7 +71,6 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     getInstance()?.action(callCommand(deleteSelectedCellsCommand.key))
   }, [getInstance, setSelectionToCell])
 
-  // Position overlay to exactly cover the table (no DOM move)
   const positionOverlay = useCallback((table: HTMLElement, overlay: HTMLElement) => {
     const editor = editorRef.current
     if (!editor) return
@@ -105,7 +102,6 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       const rowTop = rowRect.top - tableRect.top
       const rowBottom = rowRect.bottom - tableRect.top
 
-      // + button sits on bottom border of row (= dividing line between rows)
       const addRowBtn = document.createElement('button')
       addRowBtn.type = 'button'
       addRowBtn.className = 'table-edge-btn table-add-row-btn'
@@ -125,7 +121,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       delRowBtn.addEventListener('click', (e) => { e.preventDefault(); if (rowCount > 1) handleDeleteRow(table, rowIndex) })
       overlay.appendChild(delRowBtn)
 
-      // 300ms delay so mouse can travel from row to button without it disappearing
+      // 300ms delay so mouse can travel from row to button without disappearing
       let rowTimer: ReturnType<typeof setTimeout> | null = null
       const showRow = () => {
         if (rowTimer) { clearTimeout(rowTimer); rowTimer = null }
@@ -153,7 +149,6 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       const colLeft = cellRect.left - tableRect.left
       const colRight = cellRect.right - tableRect.left
 
-      // + button sits on right border of column (= dividing line between columns)
       const addColBtn = document.createElement('button')
       addColBtn.type = 'button'
       addColBtn.className = 'table-edge-btn table-add-col-btn'
@@ -208,7 +203,6 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     const editor = editorRef.current
     if (!editor) return
 
-    // Create overlay as child of editor (never touch ProseMirror's table node)
     const overlay = document.createElement('div')
     overlay.className = 'table-edge-overlay'
     editor.appendChild(overlay)
@@ -217,29 +211,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     positionOverlay(table, overlay)
     updateButtons(table, overlay)
 
-    // Hover show/hide with delay so mouse can reach buttons outside table bounds
-    const hac = new AbortController()
-    hoverControllersRef.current.set(table, hac)
-
-    const cancelHide = () => {
-      const t = hideTimersRef.current.get(table)
-      if (t != null) { clearTimeout(t); hideTimersRef.current.delete(table) }
-    }
-    const scheduleHide = () => {
-      cancelHide()
-      hideTimersRef.current.set(table, setTimeout(() => {
-        overlay.style.opacity = '0'
-        hideTimersRef.current.delete(table)
-      }, 300))
-    }
-
-    table.addEventListener('mouseenter', () => { cancelHide(); overlay.style.opacity = '1' }, { signal: hac.signal })
-    table.addEventListener('mouseleave', scheduleHide, { signal: hac.signal })
-    // Keep overlay visible when hovering buttons
-    overlay.addEventListener('mouseenter', cancelHide)
-    overlay.addEventListener('mouseleave', scheduleHide)
-
-    // Per-table structural observer (only rebuilds on row/col additions/removals)
+    // Per-table structural observer — only rebuilds on row/col additions/removals
     const STRUCTURAL_TAGS = new Set(['TR', 'TD', 'TH', 'TBODY', 'THEAD'])
     const observer = new MutationObserver((mutations) => {
       const isStructural = mutations.some((m) =>
@@ -273,10 +245,6 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
             observersRef.current.delete(table)
             buttonControllersRef.current.get(table)?.abort()
             buttonControllersRef.current.delete(table)
-            hoverControllersRef.current.get(table)?.abort()
-            hoverControllersRef.current.delete(table)
-            const t = hideTimersRef.current.get(table)
-            if (t != null) { clearTimeout(t); hideTimersRef.current.delete(table) }
             const overlay = overlaysRef.current.get(table)
             overlay?.parentNode?.removeChild(overlay)
             overlaysRef.current.delete(table)
@@ -312,10 +280,6 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       observersRef.current.clear()
       buttonControllersRef.current.forEach((ac) => ac.abort())
       buttonControllersRef.current.clear()
-      hoverControllersRef.current.forEach((ac) => ac.abort())
-      hoverControllersRef.current.clear()
-      hideTimersRef.current.forEach((t) => clearTimeout(t))
-      hideTimersRef.current.clear()
       overlaysRef.current.forEach((overlay) => overlay.parentNode?.removeChild(overlay))
       overlaysRef.current.clear()
       tablesRef.current.clear()
