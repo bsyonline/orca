@@ -2,6 +2,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 64px 24px 120px;
+  position: relative;
 }
 
 /* Remove all focus outlines from ProseMirror */
