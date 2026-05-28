@@ -217,9 +217,9 @@
 .milkdown th, .milkdown .ProseMirror th {
   text-align: left;
   padding: 10px 14px;
-  font-size: 11px;
-  color: var(--ink-3);
-  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   background: var(--bg-subtle);
@@ -230,6 +230,16 @@
   padding: 10px 14px;
   color: var(--ink-2);
   border: 1px solid var(--border-sub);
+}
+
+.milkdown tbody tr:nth-child(odd) td,
+.milkdown .ProseMirror tbody tr:nth-child(odd) td {
+  background: var(--bg-subtle);
+}
+
+.milkdown tbody tr:nth-child(even) td,
+.milkdown .ProseMirror tbody tr:nth-child(even) td {
+  background: transparent;
 }
 
 /* Lists */
