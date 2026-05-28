@@ -394,6 +394,42 @@ useEffect(() => {
       onPaste={(e) => !sourceMode && handleImagePaste(e, filePath)}
       onDrop={(e) => !sourceMode && handleImageDrop(e, filePath)}
       onDragOver={(e) => e.preventDefault()}
+      onClick={(e) => {
+        if (sourceMode) return
+        const instance = getInstance()
+        if (!instance) return
+
+        instance.action((ctx) => {
+          const view = ctx.get(editorViewCtx)
+          if (!view) return
+
+          const wrapper = editorRef.current
+          if (!wrapper) return
+
+          const proseMirrorEl = wrapper.querySelector('.ProseMirror') as HTMLElement
+          if (!proseMirrorEl) return
+
+          const clickY = e.clientY
+          const proseMirrorRect = proseMirrorEl.getBoundingClientRect()
+
+          if (clickY > proseMirrorRect.bottom) {
+            const { state, dispatch } = view
+            const docSize = state.doc.content.size
+            const lastNode = state.doc.lastChild
+
+            if (!lastNode || (lastNode.type.name === 'paragraph' && lastNode.content.size === 0)) {
+              const pos = docSize - 1
+              dispatch(state.tr.setSelection(TextSelection.create(state.doc, pos)))
+              view.focus()
+            } else {
+              const paragraph = state.schema.nodes.paragraph.create()
+              const tr = state.tr.insert(docSize, paragraph)
+              dispatch(tr.setSelection(TextSelection.create(tr.doc, docSize + 1)))
+              view.focus()
+            }
+          }
+        })
+      }}
     >
       <div style={{ display: sourceMode ? 'none' : undefined }}>
         <Milkdown />
