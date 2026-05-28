@@ -283,6 +283,9 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
             overlay?.parentNode?.removeChild(overlay)
             overlaysRef.current.delete(table)
             tablesRef.current.delete(table)
+          } else {
+            const overlay = overlaysRef.current.get(table)
+            if (overlay) positionOverlay(table, overlay)
           }
         })
         // Attach new tables

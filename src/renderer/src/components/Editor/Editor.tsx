@@ -190,12 +190,18 @@ export function Editor({ filePath, initialContent }: EditorProps) {
         case 'insertAbove':
         case 'insertBelow':
           getInstance()?.action((ctx) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const view = ctx.get(editorViewCtx) as any
             const { state, dispatch } = view
             const { $from } = state.selection
-            const depth = Math.min($from.depth, 1)
-            const pos = type === 'insertAbove' ? $from.before(depth) : $from.after(depth)
+            let targetDepth = 1
+            for (let d = $from.depth; d >= 1; d--) {
+              const node = $from.node(d)
+              if (node.type.name === 'table' || node.type.name === 'code_block') {
+                targetDepth = d
+                break
+              }
+            }
+            const pos = type === 'insertAbove' ? $from.before(targetDepth) : $from.after(targetDepth)
             const paragraph = state.schema.nodes.paragraph.create()
             const tr = state.tr.insert(pos, paragraph)
             tr.setSelection(TextSelection.create(tr.doc, pos + 1))
