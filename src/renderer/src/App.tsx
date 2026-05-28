@@ -3,12 +3,11 @@ import { useEffect, useState } from 'react'
 import { MilkdownProvider } from '@milkdown/react'
 import { FileTree } from './components/FileTree/FileTree'
 import { Editor } from './components/Editor/Editor'
-import { StatusBar } from './components/StatusBar/StatusBar'
 import { useAppStore } from './store/useAppStore'
 
 export default function App() {
-  const { activeFile, activeFileContent, openFile, setFileTree, setWorkspaceRoot, setActiveFile } = useAppStore()
-  const [sidebarVisible, setSidebarVisible] = useState(true)
+  const { activeFile, activeFileContent, openFile, setFileTree, setWorkspaceRoot, setActiveFile, workspaceRoot } = useAppStore()
+  const [sidebarVisible, setSidebarVisible] = useState(workspaceRoot !== null)
 
   const handleOpenFolder = async () => {
     const selectedPath = await window.api.openFolder()
@@ -16,10 +15,12 @@ export default function App() {
     if (selectedPath.endsWith('.md')) {
       const content = await window.api.readFile(selectedPath)
       openFile(selectedPath, content)
+      setSidebarVisible(false)
     } else {
       setWorkspaceRoot(selectedPath)
       const tree = await window.api.listDir(selectedPath)
       setFileTree(tree)
+      setSidebarVisible(true)
     }
   }
 
@@ -121,7 +122,6 @@ export default function App() {
             )}
           </main>
         </div>
-        <StatusBar />
       </div>
     </MilkdownProvider>
   )

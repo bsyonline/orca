@@ -5,55 +5,11 @@
   overflow: hidden;
 }
 
-/* macOS drag region — leaves room for traffic lights */
+/* macOS drag region */
 .file-tree-titlebar {
   height: 46px;
   flex-shrink: 0;
   -webkit-app-region: drag;
-  border-bottom: 1px solid var(--border-sub);
-}
-
-/* Search */
-.file-tree-search {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 8px 10px 4px;
-  padding: 6px 10px;
-  background: rgba(255, 253, 246, 0.8);
-  border: 1px solid var(--border-sub);
-  border-radius: 7px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.file-tree-search-icon {
-  color: var(--ink-3);
-  flex-shrink: 0;
-}
-
-.file-tree-search-input {
-  flex: 1;
-  background: none;
-  border: none;
-  outline: none;
-  color: var(--ink);
-  font-size: 12px;
-  font-family: inherit;
-  cursor: default;
-}
-
-.file-tree-search-input::placeholder { color: var(--ink-3); }
-
-.file-tree-search-kbd {
-  font-size: 9px;
-  color: var(--ink-3);
-  font-family: 'Menlo', 'Monaco', monospace;
-  padding: 1px 5px;
-  background: var(--bg-subtle);
-  border-radius: 3px;
-  border: 1px solid var(--border-sub);
-  flex-shrink: 0;
 }
 
 /* Workspace header */
@@ -149,31 +105,3 @@
 }
 
 .file-node.active .file-node-icon { opacity: 0.85; color: var(--accent-ink); }
-
-/* Footer */
-.file-tree-footer {
-  flex-shrink: 0;
-  padding: 8px 10px 12px;
-  border-top: 1px solid var(--border-sub);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.file-tree-new-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 30px;
-  background: transparent;
-  border: 1px solid var(--border-def);
-  border-radius: 7px;
-  color: var(--ink);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 120ms;
-}
-.file-tree-new-btn:hover { background: var(--bg-subtle); }

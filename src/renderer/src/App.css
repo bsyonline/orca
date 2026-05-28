@@ -1,16 +1,16 @@
 :root {
   --sidebar-width: 240px;
 
-  --bg-page:    #F7F4EC;
-  --bg-subtle:  #EFEBE0;
-  --bg-sidebar: #F7F4EC;
-  --bg-code:    #F0ECDF;
+  --bg-page:    #FFFFFF;
+  --bg-subtle:  #F0F0F0;
+  --bg-sidebar: #F7F7F7;
+  --bg-code:    #F7F7F7;
 
   --ink:        #3A3833;
   --ink-2:      #6B6862;
   --ink-3:      #A09C92;
 
-  --border-sub: rgba(58, 56, 51, 0.08);
+  --border-sub: #D3D3D3;
   --border-def: rgba(58, 56, 51, 0.14);
 
   --accent:           #3A3833;
@@ -45,7 +45,6 @@ body {
   height: 100vh;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  background-image: none;
 }
 
 *::-webkit-scrollbar { width: 8px; }
@@ -57,13 +56,12 @@ button { font-family: inherit; }
 ::selection { background: rgba(58, 56, 51, 0.14); }
 
 .app { display: flex; flex-direction: column; height: 100vh; }
-.app-body { display: flex; flex: 1; overflow: hidden; }
+.app-body { display: flex; flex: 1; overflow: hidden; background: var(--bg-sidebar); }
 
 .sidebar {
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
   background: var(--bg-sidebar);
-  border-right: 1px solid var(--border-sub);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -75,6 +73,9 @@ button { font-family: inherit; }
   display: flex;
   flex-direction: column;
   padding-top: 38px;
+  background: var(--bg-page);
+  margin-left: 8px;
+  border-radius: 12px 0 0 12px;
 }
 
 .titlebar-drag {

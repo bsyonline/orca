@@ -54,9 +54,10 @@ function createWindow(): BrowserWindow {
 }
 
 function buildMenu(win: BrowserWindow): void {
-  const s = (type: string) => win.webContents.send(type)
-  const p = (type: string) => win.webContents.send('menu:paragraph', type)
-  const f = (type: string) => win.webContents.send('menu:format', type)
+  const getWin = () => BrowserWindow.getFocusedWindow() || win
+  const s = (type: string) => getWin()?.webContents.send(type)
+  const p = (type: string) => getWin()?.webContents.send('menu:paragraph', type)
+  const f = (type: string) => getWin()?.webContents.send('menu:format', type)
   let alwaysOnTop = false
 
   const menu = Menu.buildFromTemplate([
@@ -81,7 +82,7 @@ function buildMenu(win: BrowserWindow): void {
         { label: '打开...', accelerator: 'CmdOrCtrl+O', click: () => s('menu:openFolder') },
         { label: '打开最近文件', role: 'recentDocuments', submenu: [{ role: 'clearRecentDocuments' }] },
         { type: 'separator' },
-        { label: '关闭', accelerator: 'CmdOrCtrl+W', click: () => win.close() },
+        { label: '关闭', accelerator: 'CmdOrCtrl+W', click: () => getWin()?.close() },
         { type: 'separator' },
         { label: '保存', accelerator: 'CmdOrCtrl+S', click: () => s('menu:save') },
         { label: '重新命名...', click: () => s('menu:renameFile') },
@@ -103,21 +104,21 @@ function buildMenu(win: BrowserWindow): void {
         { type: 'separator' },
         { label: '共享', enabled: false },
         { type: 'separator' },
-        { label: '打印...', accelerator: 'CmdOrCtrl+P', click: () => win.webContents.print({ silent: false, printBackground: true }) },
+        { label: '打印...', accelerator: 'CmdOrCtrl+P', click: () => getWin()?.webContents.print({ silent: false, printBackground: true }) },
       ],
     },
     {
       label: '编辑',
       submenu: [
-        { label: '撤销', accelerator: 'CmdOrCtrl+Z', click: () => win.webContents.undo() },
-        { label: '重做', accelerator: 'Shift+CmdOrCtrl+Z', click: () => win.webContents.redo() },
+        { label: '撤销', accelerator: 'CmdOrCtrl+Z', click: () => getWin()?.webContents.undo() },
+        { label: '重做', accelerator: 'Shift+CmdOrCtrl+Z', click: () => getWin()?.webContents.redo() },
         { type: 'separator' },
-        { label: '剪切', accelerator: 'CmdOrCtrl+X', click: () => win.webContents.cut() },
-        { label: '拷贝', accelerator: 'CmdOrCtrl+C', click: () => win.webContents.copy() },
-        { label: '粘贴', accelerator: 'CmdOrCtrl+V', click: () => win.webContents.paste() },
-        { label: '按当前格式粘贴', accelerator: 'Alt+Shift+CmdOrCtrl+V', click: () => win.webContents.pasteAndMatchStyle() },
-        { label: '删除', click: () => win.webContents.delete() },
-        { label: '全选', accelerator: 'CmdOrCtrl+A', click: () => win.webContents.selectAll() },
+        { label: '剪切', accelerator: 'CmdOrCtrl+X', click: () => getWin()?.webContents.cut() },
+        { label: '拷贝', accelerator: 'CmdOrCtrl+C', click: () => getWin()?.webContents.copy() },
+        { label: '粘贴', accelerator: 'CmdOrCtrl+V', click: () => getWin()?.webContents.paste() },
+        { label: '按当前格式粘贴', accelerator: 'Alt+Shift+CmdOrCtrl+V', click: () => getWin()?.webContents.pasteAndMatchStyle() },
+        { label: '删除', click: () => getWin()?.webContents.delete() },
+        { label: '全选', accelerator: 'CmdOrCtrl+A', click: () => getWin()?.webContents.selectAll() },
         { type: 'separator' },
         { label: '复制为 Markdown', accelerator: 'Shift+CmdOrCtrl+C', click: () => s('menu:copyMarkdown') },
         { label: '复制为纯文本', click: () => s('menu:copyAsText') },
@@ -133,13 +134,13 @@ function buildMenu(win: BrowserWindow): void {
           submenu: [
             {
               label: '开始朗读',
-              click: () => win.webContents.executeJavaScript(
+              click: () => getWin()?.webContents.executeJavaScript(
                 '(() => { speechSynthesis.cancel(); const t = getSelection()?.toString() || document.body.innerText; const u = new SpeechSynthesisUtterance(t.slice(0,5000)); speechSynthesis.speak(u) })()',
               ),
             },
             {
               label: '停止朗读',
-              click: () => win.webContents.executeJavaScript('speechSynthesis.cancel()'),
+              click: () => getWin()?.webContents.executeJavaScript('speechSynthesis.cancel()'),
             },
           ],
         },
@@ -239,13 +240,13 @@ function buildMenu(win: BrowserWindow): void {
         { type: 'separator' },
         { label: '字数统计', click: () => s('menu:wordCount') },
         { type: 'separator' },
-        { label: '实际大小', accelerator: 'Shift+CmdOrCtrl+0', click: () => win.webContents.setZoomLevel(0) },
-        { label: '放大', accelerator: 'Shift+CmdOrCtrl+=', click: () => win.webContents.setZoomLevel(win.webContents.getZoomLevel() + 1) },
-        { label: '缩小', accelerator: 'Shift+CmdOrCtrl+-', click: () => win.webContents.setZoomLevel(win.webContents.getZoomLevel() - 1) },
+        { label: '实际大小', accelerator: 'Shift+CmdOrCtrl+0', click: () => getWin()?.webContents.setZoomLevel(0) },
+        { label: '放大', accelerator: 'Shift+CmdOrCtrl+=', click: () => { const w = getWin(); if (w) w.webContents.setZoomLevel(w.webContents.getZoomLevel() + 1) } },
+        { label: '缩小', accelerator: 'Shift+CmdOrCtrl+-', click: () => { const w = getWin(); if (w) w.webContents.setZoomLevel(w.webContents.getZoomLevel() - 1) } },
         { type: 'separator' },
-        { label: '保持窗口在最前端', type: 'checkbox', checked: false, click: (item) => { alwaysOnTop = item.checked; win.setAlwaysOnTop(alwaysOnTop) } },
+        { label: '保持窗口在最前端', type: 'checkbox', checked: false, click: (item) => { const w = getWin(); if (w) { alwaysOnTop = item.checked; w.setAlwaysOnTop(alwaysOnTop) } } },
         { type: 'separator' },
-        { label: '进入全屏幕', accelerator: 'Ctrl+CmdOrCtrl+F', click: () => win.setFullScreen(!win.isFullScreen()) },
+        { label: '进入全屏幕', accelerator: 'Ctrl+CmdOrCtrl+F', click: () => { const w = getWin(); if (w) w.setFullScreen(!w.isFullScreen()) } },
       ],
     },
     {
@@ -258,10 +259,10 @@ function buildMenu(win: BrowserWindow): void {
     {
       label: '窗口',
       submenu: [
-        { label: '最小化', accelerator: 'CmdOrCtrl+M', click: () => win.minimize() },
-        { label: '缩放', click: () => { win.isMaximized() ? win.unmaximize() : win.maximize() } },
+        { label: '最小化', accelerator: 'CmdOrCtrl+M', click: () => getWin()?.minimize() },
+        { label: '缩放', click: () => { const w = getWin(); if (w) { w.isMaximized() ? w.unmaximize() : w.maximize() } } },
         { type: 'separator' },
-        { label: '前置所有窗口', click: () => BrowserWindow.getAllWindows().forEach((w) => { if (w.isMinimized()) w.restore(); w.show() }) },
+        { label: '前置所有窗口', click: () => BrowserWindow.getAllWindows().forEach((w) => { if (!w.isDestroyed() && w.isMinimized()) w.restore(); w.show() }) },
       ],
     },
     {
@@ -269,7 +270,7 @@ function buildMenu(win: BrowserWindow): void {
       submenu: [
         { label: '检查更新...', enabled: false },
         { type: 'separator' },
-        { label: '切换开发者工具', accelerator: 'F12', click: () => win.webContents.toggleDevTools() },
+        { label: '切换开发者工具', accelerator: 'F12', click: () => getWin()?.webContents.toggleDevTools() },
       ],
     },
   ])
