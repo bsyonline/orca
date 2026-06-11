@@ -98,3 +98,23 @@ button { font-family: inherit; }
   color: var(--ink-3);
   font-size: 14px;
 }
+
+.editor-area.drag-over {
+  position: relative;
+}
+
+.editor-area.drag-over::after {
+  content: '松开以打开文件';
+  position: absolute;
+  inset: 0;
+  background: rgba(58, 56, 51, 0.06);
+  border: 2px dashed var(--accent);
+  border-radius: 12px 0 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: var(--ink-2);
+  z-index: 100;
+  pointer-events: none;
+}
