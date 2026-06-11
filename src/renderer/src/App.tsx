@@ -8,6 +8,7 @@ import { useAppStore } from './store/useAppStore'
 export default function App() {
   const { activeFile, activeFileContent, openFile, setFileTree, setWorkspaceRoot, setActiveFile, workspaceRoot } = useAppStore()
   const [sidebarVisible, setSidebarVisible] = useState(workspaceRoot !== null)
+  const [isDragOver, setIsDragOver] = useState(false)
 
   const handleOpenFolder = async () => {
     const selectedPath = await window.api.openFolder()
@@ -32,6 +33,29 @@ export default function App() {
   const handleNewFile = async () => {
     const filePath = await window.api.newFile()
     if (filePath) openFile(filePath, '')
+  }
+
+  const handleDragOver = (e: React.DragEvent<HTMLElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.dataTransfer.items[0]?.kind === 'file') {
+      setIsDragOver(true)
+    }
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false)
+    }
+  }
+
+  const handleDrop = async (e: React.DragEvent<HTMLElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+    const file = e.dataTransfer.files[0] as File & { path: string }
+    if (!file?.path?.endsWith('.md')) return
+    await handleFileSelect(file.path)
   }
 
   useEffect(() => {
@@ -113,7 +137,12 @@ export default function App() {
               <FileTree onOpenFolder={handleOpenFolder} onFileSelect={handleFileSelect} onNewFile={handleNewFile} />
             </aside>
           )}
-          <main className="editor-area">
+          <main
+            className={`editor-area${isDragOver ? ' drag-over' : ''}`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             <div className="titlebar-drag" />
             {activeFile ? (
               <Editor key={activeFile} filePath={activeFile} initialContent={activeFileContent} />
