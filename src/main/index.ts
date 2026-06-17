@@ -8,7 +8,7 @@ import { registerExportHandlers } from './handlers/export'
 
 protocol.registerSchemesAsPrivileged([
   {
-    scheme: 'oraca-img',
+    scheme: 'orca-img',
     privileges: {
       secure: true,
       standard: true,
@@ -26,7 +26,7 @@ function createWindow(): BrowserWindow {
     height: 800,
     show: false,
     titleBarStyle: 'hiddenInset',
-    tabbingIdentifier: 'oraca',
+    tabbingIdentifier: 'orca',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -281,9 +281,9 @@ function buildMenu(win: BrowserWindow): void {
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
 
-  protocol.handle('oraca-img', (request) => {
+  protocol.handle('orca-img', (request) => {
     const url = request.url
-    let filePath = url.slice('oraca-img:'.length)
+    let filePath = url.slice('orca-img:'.length)
     if (filePath.startsWith('//')) {
       filePath = filePath.slice(2)
     }

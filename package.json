@@ -1,5 +1,5 @@
 {
-  "name": "oraca",
+  "name": "orca",
   "version": "1.0.0",
   "description": "A Markdown editor desktop app (Typora alternative)",
   "main": "./out/main/index.js",

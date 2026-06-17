@@ -279,9 +279,9 @@ useEffect(() => {
   processTables()
 
   const handleTableAdded = () => processTables()
-  window.addEventListener('oraca-table-added', handleTableAdded)
+  window.addEventListener('orca-table-added', handleTableAdded)
   
-  return () => window.removeEventListener('oraca-table-added', handleTableAdded)
+  return () => window.removeEventListener('orca-table-added', handleTableAdded)
 }, [editorRef, wrapTable])
 ```
 
@@ -289,7 +289,7 @@ useEffect(() => {
 
 ```typescript
   return () => {
-    window.removeEventListener('oraca-table-added', handleTableAdded)
+    window.removeEventListener('orca-table-added', handleTableAdded)
     observersRef.current.forEach((observer) => observer.disconnect())
     observersRef.current.clear()
     abortControllersRef.current.forEach((ac) => ac.abort())

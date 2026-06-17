@@ -88,7 +88,7 @@ Renderer Process (React)
 ## 项目结构
 
 ```
-oraca/
+orca/
 ├── electron/
 │   ├── main.ts                    # 主进程入口
 │   ├── preload.ts                 # IPC 安全桥接

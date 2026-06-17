@@ -55,8 +55,8 @@
 - [ ] **Step 1: Scaffold the project**
 
 ```bash
-npm create @quick-start/electron@latest oraca -- --template react-ts
-cd oraca
+npm create @quick-start/electron@latest orca -- --template react-ts
+cd orca
 npm install
 ```
 
@@ -1578,8 +1578,8 @@ git commit -m "feat: implement Milkdown WYSIWYG editor with code, math, auto-sav
 import type { Configuration } from 'electron-builder'
 
 const config: Configuration = {
-  appId: 'com.yourname.oraca',
-  productName: 'Oraca',
+  appId: 'com.yourname.orca',
+  productName: 'orca',
   mac: {
     category: 'public.app-category.productivity',
     target: [{ target: 'dmg', arch: ['arm64', 'x64'] }],
