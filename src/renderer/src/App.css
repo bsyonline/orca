@@ -91,6 +91,11 @@ button { font-family: inherit; }
 
 .sidebar-hidden .titlebar-drag { left: 0; }
 
+.sidebar-hidden .editor-area {
+  margin-left: 0;
+  border-radius: 0;
+}
+
 .editor-empty {
   display: flex;
   align-items: center;
@@ -113,4 +118,8 @@ button { font-family: inherit; }
   color: var(--ink-2);
   z-index: 100;
   pointer-events: none;
+}
+
+.sidebar-hidden .editor-area.drag-over::after {
+  border-radius: 0;
 }
