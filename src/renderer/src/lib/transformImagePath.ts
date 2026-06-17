@@ -5,7 +5,7 @@ export function transformImagePath(markdown: string, mdFilePath: string): string
       if (
         imagePath.startsWith('http://') ||
         imagePath.startsWith('https://') ||
-        imagePath.startsWith('oraca-img://') ||
+        imagePath.startsWith('orca-img://') ||
         imagePath.startsWith('data:')
       ) {
         return match
@@ -13,7 +13,7 @@ export function transformImagePath(markdown: string, mdFilePath: string): string
       const mdDir = mdFilePath.substring(0, mdFilePath.lastIndexOf('/'))
       if (!mdDir) return match
       const absolutePath = resolveRelativePath(mdDir, imagePath)
-      return `![${alt}](oraca-img://${absolutePath})`
+      return `![${alt}](orca-img://${absolutePath})`
     },
   )
 }
@@ -21,7 +21,7 @@ export function transformImagePath(markdown: string, mdFilePath: string): string
 export function restoreImagePath(markdown: string, mdFilePath: string): string {
   const mdDir = mdFilePath.substring(0, mdFilePath.lastIndexOf('/'))
   return markdown.replace(
-    /!\[(.*?)\]\(oraca-img:\/\/([^)]+)\)/g,
+    /!\[(.*?)\]\(orca-img:\/\/([^)]+)\)/g,
     (_, alt, absolutePath) => {
       const decodedPath = decodeURIComponent(absolutePath)
       const relativePath = computeRelativePath(mdDir, decodedPath)
