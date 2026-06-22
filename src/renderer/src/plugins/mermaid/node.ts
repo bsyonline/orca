@@ -29,11 +29,11 @@ export const mermaidSchema = $nodeSchema('mermaid', () => ({
     ['code', 0],
   ],
   parseMarkdown: {
-    match: (node) => node.type === 'code' && node.lang === 'mermaid',
+    match: (node) => node.type === 'mermaid',
     runner: (state, node, type) => {
       state.openNode(type)
       if (node.value) {
-        state.addText(node.value)
+        state.addText(node.value as string)
       }
       state.closeNode()
     },

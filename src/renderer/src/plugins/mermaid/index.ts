@@ -22,7 +22,7 @@ const mermaidProsePlugin = $prose(() => {
     key: new PluginKey('mermaid-view'),
     props: {
       nodeViews: {
-        mermaid: (node, view, getPos) => mermaidView(node, view, getPos),
+        mermaid: mermaidView,
       },
     },
   })
