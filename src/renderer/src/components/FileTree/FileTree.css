@@ -94,14 +94,13 @@
 .file-node-children { padding-left: 10px; }
 
 .file-node-icon {
-  font-size: 11px;
-  opacity: 0.50;
   flex-shrink: 0;
   width: 14px;
+  height: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--ink-3);
 }
 
-.file-node.active .file-node-icon { opacity: 0.85; color: var(--accent-ink); }
+.file-node.active .file-node-icon { color: var(--accent-ink); }
