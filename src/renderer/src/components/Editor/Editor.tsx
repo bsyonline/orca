@@ -37,6 +37,7 @@ import { basename } from '../../lib/pathUtils'
 import { transformImagePath, restoreImagePath } from '../../lib/transformImagePath'
 import { TableDialog } from './TableDialog'
 import { TableEdgeButtons } from './TableEdgeButtons'
+import { mermaidSchema, mermaidRemarkPlugin, mermaidProsePlugin } from '../../plugins/mermaid'
 
 import '@milkdown/prose/view/style/prosemirror.css'
 
@@ -90,7 +91,10 @@ export function Editor({ filePath, initialContent }: EditorProps) {
       .use(commonmark)
       .use(gfm)
       .use(history)
-      .use(listener),
+      .use(listener)
+      .use(mermaidSchema)
+      .use(mermaidRemarkPlugin)
+      .use(mermaidProsePlugin),
   )
 
   const [, getInstance] = useInstance()
@@ -362,11 +366,7 @@ useEffect(() => {
       const markdown = getInstance()?.action(getMarkdown())
       if (!markdown) return
       const restoredMarkdown = restoreImagePath(markdown, filePath)
-      const { unified } = await import('unified')
-      const { default: remarkParse } = await import('remark-parse')
-      const { default: remarkHtml } = await import('remark-html')
-      const result = await unified().use(remarkParse).use(remarkHtml).process(restoredMarkdown)
-      const html = buildHTMLDocument(String(result), basename(filePath, '.md'))
+      const html = await buildHTMLDocument(restoredMarkdown, basename(filePath, '.md'))
       await window.api.exportHTML(filePath.replace(/\.md$/, '.html'), html)
     }
 

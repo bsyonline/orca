@@ -6,7 +6,7 @@ import { useAppStore } from '../store/useAppStore'
 describe('FileTree', () => {
   it('shows "打开文件夹" button when no workspace', () => {
     useAppStore.setState({ workspaceRoot: null, fileTree: [], activeFile: null })
-    render(<FileTree onOpenFolder={vi.fn()} onFileSelect={vi.fn()} />)
+    render(<FileTree onOpenFolder={vi.fn()} onFileSelect={vi.fn()} onNewFile={vi.fn()} />)
     expect(screen.getByText('打开文件夹')).toBeInTheDocument()
   })
 
@@ -16,7 +16,7 @@ describe('FileTree', () => {
       fileTree: [{ name: 'note.md', path: '/docs/note.md', type: 'file' }],
       activeFile: null,
     })
-    render(<FileTree onOpenFolder={vi.fn()} onFileSelect={vi.fn()} />)
+    render(<FileTree onOpenFolder={vi.fn()} onFileSelect={vi.fn()} onNewFile={vi.fn()} />)
     expect(screen.getByText('note.md')).toBeInTheDocument()
   })
 
@@ -27,7 +27,7 @@ describe('FileTree', () => {
       fileTree: [{ name: 'note.md', path: '/docs/note.md', type: 'file' }],
       activeFile: null,
     })
-    render(<FileTree onOpenFolder={vi.fn()} onFileSelect={onFileSelect} />)
+    render(<FileTree onOpenFolder={vi.fn()} onFileSelect={onFileSelect} onNewFile={vi.fn()} />)
     fireEvent.click(screen.getByText('note.md'))
     expect(onFileSelect).toHaveBeenCalledWith('/docs/note.md')
   })

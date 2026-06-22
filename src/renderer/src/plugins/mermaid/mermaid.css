@@ -1,0 +1,57 @@
+.mermaid-wrapper {
+  margin: 14px 0;
+  text-align: center;
+  border: 1px solid var(--border-sub);
+  border-radius: 10px;
+  padding: 16px;
+  background: var(--bg-subtle);
+  cursor: pointer;
+  min-height: 60px;
+}
+
+.mermaid-wrapper svg {
+  max-width: 100%;
+  display: inline-block;
+}
+
+.mermaid-editor {
+  width: 100%;
+  min-height: 200px;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  border: 1px solid var(--border-def);
+  border-radius: 8px;
+  background: var(--bg-code);
+  color: var(--ink);
+  padding: 14px;
+  outline: none;
+  resize: vertical;
+}
+
+.mermaid-empty {
+  color: var(--ink-3);
+  font-size: 14px;
+  user-select: none;
+}
+
+.mermaid-error {
+  color: var(--error);
+  border: 1px solid var(--error);
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--bg-subtle);
+}
+
+.mermaid-error p {
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.mermaid-error pre {
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 12px;
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--ink-2);
+}
