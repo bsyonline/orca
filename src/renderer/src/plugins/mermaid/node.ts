@@ -1,6 +1,6 @@
 import { $nodeSchema } from '@milkdown/kit/utils'
 
-export const mermaidSchema = $nodeSchema('mermaid', {
+export const mermaidSchema = $nodeSchema('mermaid', () => ({
   content: 'text*',
   group: 'block',
   code: true,
@@ -28,4 +28,22 @@ export const mermaidSchema = $nodeSchema('mermaid', {
     },
     ['code', 0],
   ],
-})
+  parseMarkdown: {
+    match: (node) => node.type === 'code' && node.lang === 'mermaid',
+    runner: (state, node, type) => {
+      state.openNode(type)
+      if (node.value) {
+        const text = state.schema.text(node.value)
+        state.next(text)
+      }
+      state.closeNode()
+    },
+  },
+  toMarkdown: {
+    match: (node) => node.type.name === 'mermaid',
+    runner: (state, node) => {
+      const text = node.textBetween(0, node.content.size)
+      state.addNode('code', undefined, text, { lang: 'mermaid' })
+    },
+  },
+}))

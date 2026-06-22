@@ -364,11 +364,7 @@ useEffect(() => {
       const markdown = getInstance()?.action(getMarkdown())
       if (!markdown) return
       const restoredMarkdown = restoreImagePath(markdown, filePath)
-      const { unified } = await import('unified')
-      const { default: remarkParse } = await import('remark-parse')
-      const { default: remarkHtml } = await import('remark-html')
-      const result = await unified().use(remarkParse).use(remarkHtml).process(restoredMarkdown)
-      const html = buildHTMLDocument(String(result), basename(filePath, '.md'))
+      const html = await buildHTMLDocument(restoredMarkdown, basename(filePath, '.md'))
       await window.api.exportHTML(filePath.replace(/\.md$/, '.html'), html)
     }
 

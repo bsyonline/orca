@@ -64,7 +64,7 @@ function parseLine(line: string): Paragraph {
 
 export async function markdownToDocxBuffer(markdown: string): Promise<Uint8Array> {
   const lines = markdown.split('\n')
-  const children: (Paragraph | ImageRun)[] = []
+  const children: Paragraph[] = []
   
   let inMermaidBlock = false
   let mermaidSrc = ''

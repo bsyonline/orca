@@ -1,4 +1,4 @@
-import type { NodeViewConstructor } from '@milkdown/kit/prose'
+import type { NodeViewConstructor } from '@milkdown/kit/prose/view'
 import mermaid from 'mermaid'
 
 mermaid.initialize({ startOnLoad: false, securityLevel: 'loose' })
@@ -39,7 +39,7 @@ export const mermaidView: NodeViewConstructor = (node, view, getPos) => {
       const textarea = document.createElement('textarea')
       textarea.className = 'mermaid-editor'
       textarea.value = getSrc()
-      textarea.spellCheck = false
+      textarea.spellcheck = false
       dom.appendChild(textarea)
       textarea.focus()
       textarea.addEventListener('blur', commitEdit)
