@@ -33,8 +33,7 @@ export const mermaidSchema = $nodeSchema('mermaid', () => ({
     runner: (state, node, type) => {
       state.openNode(type)
       if (node.value) {
-        const text = state.schema.text(node.value)
-        state.next(text)
+        state.addText(node.value)
       }
       state.closeNode()
     },
