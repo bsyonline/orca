@@ -37,6 +37,7 @@ import { basename } from '../../lib/pathUtils'
 import { transformImagePath, restoreImagePath } from '../../lib/transformImagePath'
 import { TableDialog } from './TableDialog'
 import { TableEdgeButtons } from './TableEdgeButtons'
+import { mermaidPlugin } from '../../plugins/mermaid'
 
 import '@milkdown/prose/view/style/prosemirror.css'
 
@@ -90,7 +91,8 @@ export function Editor({ filePath, initialContent }: EditorProps) {
       .use(commonmark)
       .use(gfm)
       .use(history)
-      .use(listener),
+      .use(listener)
+      .use(mermaidPlugin()),
   )
 
   const [, getInstance] = useInstance()
