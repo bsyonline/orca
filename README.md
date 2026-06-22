@@ -9,6 +9,7 @@ Orca is an open-source Markdown editor desktop app and a Typora alternative, bui
 - File tree and workspace browsing
 - WYSIWYG Markdown editing with live source sync
 - Tables, math, code blocks, and lists
+- Mermaid diagrams (sequence, flowchart, class, etc.)
 - Drag-and-drop opening for local `.md` files
 - Export to HTML, PDF, and Word
 - Local image path handling for project-relative assets
@@ -31,3 +32,15 @@ npm run build:linux
 ## License
 
 MIT. See [LICENSE](./LICENSE).
+
+## Mermaid Diagrams
+
+Write diagrams using `mermaid` code blocks:
+
+```mermaid
+sequenceDiagram
+    Alice->>Bob: Hello
+    Bob->>Alice: Hi!
+```
+
+Click the rendered diagram to edit the source code.
