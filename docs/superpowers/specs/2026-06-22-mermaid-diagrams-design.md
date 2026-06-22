@@ -37,19 +37,20 @@ src/renderer/src/plugins/mermaid/
 import { $nodeSchema } from '@milkdown/kit/utils'
 
 export const mermaidNode = $nodeSchema('mermaid', {
-  content: 'text',
+  content: 'text*',
   marks: '',
   group: 'block',
   code: true,
   isolating: true,
+  defining: true,
   attrs: {
-    src: { default: '' },      // mermaid source code
     svg: { default: '' },      // rendered SVG (cache)
   },
-  toDOM: (node) => ['div', { 'data-mermaid': node.attrs.src }, 0],
+  toDOM: (node) => ['div', { 'data-mermaid-svg': node.attrs.svg }, ['pre', 0]],
   parseDOM: [{
-    tag: 'div[data-mermaid]',
-    getAttrs: (dom) => ({ src: dom.getAttribute('data-mermaid') || '' })
+    tag: 'div[data-mermaid-svg]',
+    getAttrs: (dom) => ({ svg: dom.getAttribute('data-mermaid-svg') || '' }),
+    contentElement: 'pre'
   }]
 })
 ```
@@ -63,23 +64,36 @@ import mermaid from 'mermaid'
 
 export class MermaidView implements NodeView {
   dom: HTMLElement
+  contentDOM: HTMLElement  // for text content (source code)
   editing = false
   renderedSvg: string = ''
+  private idCounter = 0
   
   constructor(node, view, getPos) {
     this.dom = document.createElement('div')
+    this.contentDOM = document.createElement('pre')
+    this.contentDOM.style.display = 'none'
+    this.dom.appendChild(this.contentDOM)
     this.dom.className = 'mermaid-block'
     this.dom.addEventListener('click', () => this.toggleEdit())
-    this.renderSvg(node.attrs.src)
+    this.renderSvg(node.textBetween(0, node.content.size))
+  }
+  
+  generateId(): string {
+    return 'mermaid-' + (++this.idCounter) + '-' + Date.now()
   }
   
   async renderSvg(src: string) {
+    if (!src.trim()) {
+      this.dom.innerHTML = '<div class="mermaid-empty">Click to edit diagram</div>'
+      return
+    }
     try {
-      const svg = await mermaid.render('mermaid-' + generateId(), src)
+      const { svg } = await mermaid.render(this.generateId(), src)
       this.renderedSvg = svg
       this.updateDom()
     } catch (e) {
-      this.showError(src)
+      this.showError(src, e.message)
     }
   }
   
@@ -90,10 +104,14 @@ export class MermaidView implements NodeView {
   
   updateDom() {
     if (this.editing) {
-      this.dom.innerHTML = `<textarea class="mermaid-editor">${this.node.attrs.src}</textarea>`
-      const textarea = this.dom.querySelector('textarea')
-      textarea?.addEventListener('blur', () => this.commitEdit())
-      textarea?.addEventListener('keydown', (e) => {
+      this.dom.innerHTML = ''
+      const textarea = document.createElement('textarea')
+      textarea.className = 'mermaid-editor'
+      textarea.value = this.node.textBetween(0, this.node.content.size)
+      this.dom.appendChild(textarea)
+      textarea.focus()
+      textarea.addEventListener('blur', () => this.commitEdit())
+      textarea.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') this.commitEdit()
       })
     } else {
@@ -104,15 +122,21 @@ export class MermaidView implements NodeView {
   commitEdit() {
     const textarea = this.dom.querySelector('textarea')
     const newSrc = textarea?.value || ''
-    // Update node attrs and re-render
-    this.renderSvg(newSrc)
+    // Update node content via transaction
+    const pos = this.getPos()
+    if (pos !== undefined) {
+      const tr = this.view.state.tr.setNodeMarkup(pos, null, {}, [
+        this.view.state.schema.text(newSrc)
+      ])
+      this.view.dispatch(tr)
+    }
     this.editing = false
-    this.updateDom()
+    this.renderSvg(newSrc)
   }
   
-  showError(src: string) {
+  showError(src: string, errorMsg: string) {
     this.dom.innerHTML = `<div class="mermaid-error">
-      <p>Diagram syntax error</p>
+      <p>Diagram syntax error: ${errorMsg}</p>
       <pre>${src}</pre>
     </div>`
   }
@@ -140,9 +164,12 @@ Convert mermaidNode back to ` ```mermaid ` format:
 
 ```typescript
 toMarkdown: (state, node) => {
+  const src = node.textBetween(0, node.content.size)
   state.write('```mermaid\n')
-  state.text(node.attrs.src, false)
-  state.write('\n```')
+  state.text(src, false)
+  state.ensureNewLine()
+  state.write('```')
+  state.closeBlock(node)
 }
 ```
 
@@ -163,11 +190,34 @@ toMarkdown: (state, node) => {
 
 ### Word Export
 
-Two options:
-1. Render SVG, convert to PNG image, embed in docx
-2. Keep as code block (simpler, but not ideal)
+Convert SVG to PNG image and embed in docx:
 
-Recommendation: Option 1 for better visual output. Use a canvas/SVG-to-image conversion.
+1. Render mermaid diagram to SVG string
+2. Create a canvas element, draw SVG to canvas
+3. Export canvas as PNG ArrayBuffer
+4. Create docx ImageRun with PNG data
+
+Implementation approach:
+- Use `sharp` (Node.js) or browser canvas API
+- For Electron renderer process, use HTML canvas + `canvas.toDataURL('image/png')`
+- Convert data URL to ArrayBuffer for docx
+
+```typescript
+// In word.ts
+async function svgToPng(svgString: string): Promise<Uint8Array> {
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+  const img = new Image()
+  img.src = 'data:image/svg+xml;base64,' + btoa(svgString)
+  await new Promise(resolve => img.onload = resolve)
+  canvas.width = img.width
+  canvas.height = img.height
+  ctx.drawImage(img, 0, 0)
+  const dataUrl = canvas.toDataURL('image/png')
+  const base64 = dataUrl.split(',')[1]
+  return Uint8Array.from(atob(base64), c => c.charCodeAt(0))
+}
+```
 
 ## Error Handling
 
@@ -228,6 +278,17 @@ try {
   font-size: 13px;
   margin-top: 8px;
 }
+
+.mermaid-empty {
+  padding: 40px 20px;
+  color: var(--ink-3);
+  font-size: 14px;
+  user-select: none;
+}
+
+/* CSS variables used (defined in global styles):
+   --border-sub, --bg-subtle, --bg-code, --ink, --ink-3, --error
+*/
 ```
 
 ## Testing Strategy
