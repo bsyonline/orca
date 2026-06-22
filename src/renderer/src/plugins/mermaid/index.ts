@@ -28,8 +28,4 @@ const mermaidProsePlugin = $prose(() => {
   })
 })
 
-export const mermaidPlugin = () => [
-  ...mermaidSchema,
-  ...mermaidRemarkPlugin,
-  mermaidProsePlugin,
-]
+export { mermaidSchema, mermaidRemarkPlugin, mermaidProsePlugin }
