@@ -7,3 +7,4 @@ orca/
 orca.zip
 .superpowers/
 *.tsbuildinfo
+release/
