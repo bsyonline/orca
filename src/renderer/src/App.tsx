@@ -5,6 +5,10 @@ import { FileTree } from './components/FileTree/FileTree'
 import { Editor } from './components/Editor/Editor'
 import { useAppStore } from './store/useAppStore'
 
+function isMarkdownFile(filePath: string): boolean {
+  return /\.(md|markdown)$/i.test(filePath)
+}
+
 export default function App() {
   const { activeFile, activeFileContent, openFile, setFileTree, setWorkspaceRoot, setActiveFile, workspaceRoot } = useAppStore()
   const [sidebarVisible, setSidebarVisible] = useState(workspaceRoot !== null)
@@ -13,7 +17,7 @@ export default function App() {
   const handleOpenFolder = async () => {
     const selectedPath = await window.api.openFolder()
     if (!selectedPath) return
-    if (selectedPath.endsWith('.md')) {
+    if (isMarkdownFile(selectedPath)) {
       const content = await window.api.readFile(selectedPath)
       openFile(selectedPath, content)
       setSidebarVisible(false)
@@ -54,12 +58,22 @@ export default function App() {
     e.stopPropagation()
     setIsDragOver(false)
     const file = e.dataTransfer.files[0] as File & { path: string }
-    if (!file?.path?.endsWith('.md')) return
+    if (!file?.path || !isMarkdownFile(file.path)) return
     await handleFileSelect(file.path)
   }
 
   useEffect(() => {
     const cleanup = window.api.onMenuOpenFolder(handleOpenFolder)
+    return cleanup
+  }, [])
+
+  useEffect(() => {
+    const cleanup = window.api.onOpenFile(async (filePath) => {
+      const content = await window.api.readFile(filePath)
+      openFile(filePath, content)
+      setSidebarVisible(false)
+    })
+    window.api.rendererReady()
     return cleanup
   }, [])
 

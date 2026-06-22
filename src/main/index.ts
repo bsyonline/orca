@@ -1,10 +1,13 @@
-import { app, BrowserWindow, Menu, protocol } from 'electron'
+import { app, BrowserWindow, ipcMain, Menu, protocol } from 'electron'
 import { join } from 'node:path'
 import fs from 'node:fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { registerFileHandlers } from './handlers/file'
 import { registerExportHandlers } from './handlers/export'
+import { createOpenFileCoordinator } from './openFileCoordinator'
+
+const openFileCoordinator = createOpenFileCoordinator()
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -19,6 +22,30 @@ protocol.registerSchemesAsPrivileged([
     },
   },
 ])
+
+function isMarkdownFile(filePath: string): boolean {
+  return /\.(md|markdown)$/i.test(filePath)
+}
+
+function sendOpenFile(win: BrowserWindow, filePath: string): void {
+  win.webContents.send('file:openPath', filePath)
+}
+
+function openFileInApp(filePath: string): void {
+  if (!isMarkdownFile(filePath)) return
+  app.addRecentDocument(filePath)
+
+  const win = BrowserWindow.getAllWindows()[0]
+  if (win && !win.isDestroyed()) {
+    if (win.isMinimized()) win.restore()
+    win.show()
+    openFileCoordinator.openFile(filePath)
+    return
+  }
+
+  openFileCoordinator.openFile(filePath)
+  if (app.isReady()) createWindow()
+}
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -279,7 +306,8 @@ function buildMenu(win: BrowserWindow): void {
 }
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId('com.electron')
+  app.setName('Orca')
+  electronApp.setAppUserModelId('com.orca.markdown')
 
   protocol.handle('orca-img', (request) => {
     const url = request.url
@@ -322,11 +350,27 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  ipcMain.on('app:rendererReady', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win || win.isDestroyed()) return
+
+    const sender = (filePath: string) => {
+      if (!win.isDestroyed()) sendOpenFile(win, filePath)
+    }
+    openFileCoordinator.markRendererReady(sender)
+    win.once('closed', () => openFileCoordinator.clearRenderer(sender))
+  })
+
   createWindow()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('open-file', (event, filePath) => {
+  event.preventDefault()
+  openFileInApp(filePath)
 })
 
 app.on('window-all-closed', () => {

@@ -26,6 +26,7 @@ import {
 } from '@milkdown/kit/preset/gfm'
 import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
 import { history } from '@milkdown/kit/plugin/history'
+import { prism, prismConfig } from '@milkdown/plugin-prism'
 import { Milkdown, useEditor, useInstance } from '@milkdown/react'
 import { getMarkdown, callCommand, insert, replaceAll } from '@milkdown/kit/utils'
 import { TextSelection } from '@milkdown/kit/prose/state'
@@ -87,9 +88,16 @@ export function Editor({ filePath, initialContent }: EditorProps) {
           sourceMdRef.current = restoredMarkdown
           scheduleSave(markdown)
         })
+        ctx.set(prismConfig.key, {
+          configureRefractor: (refractor) => {
+            if (!refractor.registered('jsx')) refractor.alias('javascript', 'jsx')
+            if (!refractor.registered('tsx')) refractor.alias('typescript', 'tsx')
+          },
+        })
       })
       .use(commonmark)
       .use(gfm)
+      .use(prism)
       .use(history)
       .use(listener)
       .use(mermaidSchema)

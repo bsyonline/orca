@@ -35,7 +35,9 @@ function makeApi(overrides: Record<string, unknown> = {}) {
     exportPDF: vi.fn(),
     exportWord: vi.fn(),
     showWordCount: vi.fn(),
+    rendererReady: vi.fn(),
     onMenuOpenFolder: noop,
+    onOpenFile: noop,
     onMenuNewFile: noop,
     onMenuRenameFile: noop,
     onMenuDeleteFile: noop,
@@ -125,6 +127,31 @@ describe('App drag-and-drop', () => {
     })
 
     expect(readFile).toHaveBeenCalledWith('/docs/test.md')
+  })
+
+  it('opens file sent by the main process', async () => {
+    const readFile = vi.fn().mockResolvedValue('# from finder')
+    let openFileCallback: ((filePath: string) => void) | undefined
+    Object.defineProperty(window, 'api', {
+      value: makeApi({
+        readFile,
+        onOpenFile: (callback: (filePath: string) => void) => {
+          openFileCallback = callback
+          return () => {}
+        },
+      }),
+      writable: true,
+      configurable: true,
+    })
+
+    render(<App />)
+
+    await act(async () => {
+      openFileCallback?.('/docs/from-finder.markdown')
+    })
+
+    expect(readFile).toHaveBeenCalledWith('/docs/from-finder.markdown')
+    expect(useAppStore.getState().activeFile).toBe('/docs/from-finder.markdown')
   })
 
   it('ignores non-.md files on drop', async () => {

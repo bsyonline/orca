@@ -146,8 +146,8 @@
   margin: 14px 0;
   border-radius: 10px;
   overflow: hidden;
-  background: var(--bg-code);
-  border: 1px solid var(--border-sub);
+  background: #f8faf9;
+  border: 1px solid #d9e2df;
 }
 
 .milkdown pre code, .milkdown .ProseMirror pre code {
@@ -156,10 +156,68 @@
   font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   font-size: 13px;
   line-height: 1.8;
-  color: var(--ink);
+  color: #2f3a37;
   background: none;
   border: none;
   border-radius: 0;
+}
+
+.milkdown pre .token.comment,
+.milkdown pre .token.prolog,
+.milkdown pre .token.doctype,
+.milkdown pre .token.cdata {
+  color: #87928e;
+  font-style: italic;
+}
+
+.milkdown pre .token.punctuation {
+  color: #68736f;
+}
+
+.milkdown pre .token.property,
+.milkdown pre .token.tag,
+.milkdown pre .token.boolean,
+.milkdown pre .token.number,
+.milkdown pre .token.constant,
+.milkdown pre .token.symbol {
+  color: #9a5fb3;
+}
+
+.milkdown pre .token.selector,
+.milkdown pre .token.attr-name,
+.milkdown pre .token.string,
+.milkdown pre .token.char,
+.milkdown pre .token.builtin,
+.milkdown pre .token.inserted {
+  color: #2e7d5b;
+}
+
+.milkdown pre .token.operator,
+.milkdown pre .token.entity,
+.milkdown pre .token.url,
+.milkdown pre .token.variable {
+  color: #1f7a8c;
+}
+
+.milkdown pre .token.atrule,
+.milkdown pre .token.attr-value,
+.milkdown pre .token.keyword {
+  color: #3369a8;
+  font-weight: 600;
+}
+
+.milkdown pre .token.function,
+.milkdown pre .token.class-name {
+  color: #00758f;
+}
+
+.milkdown pre .token.regex,
+.milkdown pre .token.important {
+  color: #b36b00;
+}
+
+.milkdown pre .token.deleted {
+  color: #b64b5a;
 }
 
 /* Blockquote */

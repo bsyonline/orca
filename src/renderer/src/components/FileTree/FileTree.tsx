@@ -27,9 +27,19 @@ export function FileTree({ onOpenFolder, onFileSelect, onNewFile }: FileTreeProp
 
       {/* File list */}
       <div className="file-tree-body">
-        {fileTree.map((node) => (
-          <FileNode key={node.path} node={node} onFileSelect={onFileSelect} />
-        ))}
+        {!workspaceRoot ? (
+          <div className="file-tree-empty">
+            <button className="open-folder-btn" onClick={onOpenFolder}>打开文件夹</button>
+          </div>
+        ) : fileTree.length === 0 ? (
+          <div className="file-tree-empty">
+            <button className="open-folder-btn" onClick={onNewFile}>新建文件</button>
+          </div>
+        ) : (
+          fileTree.map((node) => (
+            <FileNode key={node.path} node={node} onFileSelect={onFileSelect} />
+          ))
+        )}
       </div>
     </div>
   )

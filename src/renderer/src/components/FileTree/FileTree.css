@@ -61,6 +61,23 @@
   line-height: 1.6;
 }
 
+.open-folder-btn {
+  padding: 6px 12px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border: 1px solid var(--border-def);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 120ms, border-color 120ms;
+}
+
+.open-folder-btn:hover {
+  background: rgba(46, 44, 40, 0.08);
+  border-color: var(--border-strong);
+}
+
 /* File node */
 .file-node {
   display: flex;

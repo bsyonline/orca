@@ -19,10 +19,16 @@ const api: ElectronAPI = {
   exportWord: (filePath, buffer) => ipcRenderer.invoke('export:word', filePath, buffer),
   showWordCount: (words, chars, charsNoSpaces) =>
     ipcRenderer.invoke('file:showWordCount', words, chars, charsNoSpaces),
+  rendererReady: () => ipcRenderer.send('app:rendererReady'),
 
   onMenuOpenFolder: (callback) => {
     ipcRenderer.on('menu:openFolder', callback)
     return () => ipcRenderer.removeListener('menu:openFolder', callback)
+  },
+  onOpenFile: (callback) => {
+    const handler = (_e: IpcRendererEvent, filePath: string) => callback(filePath)
+    ipcRenderer.on('file:openPath', handler)
+    return () => ipcRenderer.removeListener('file:openPath', handler)
   },
   onMenuNewFile: (callback) => {
     ipcRenderer.on('menu:newFile', callback)

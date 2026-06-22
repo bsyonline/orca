@@ -25,8 +25,10 @@ export interface ElectronAPI {
   exportWord: (filePath: string, buffer: Uint8Array) => Promise<void>
   // UI helpers
   showWordCount: (words: number, chars: number, charsNoSpaces: number) => Promise<void>
+  rendererReady: () => void
   // Menu events - file
   onMenuOpenFolder: (callback: () => void) => () => void
+  onOpenFile: (callback: (filePath: string) => void) => () => void
   onMenuNewFile: (callback: () => void) => () => void
   onMenuRenameFile: (callback: () => void) => () => void
   onMenuDeleteFile: (callback: () => void) => () => void
