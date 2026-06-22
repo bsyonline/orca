@@ -66,8 +66,13 @@ export const mermaidView: NodeViewConstructor = (node, view, getPos) => {
     svgContent = svg
     
     const tr = view.state.tr.setNodeMarkup(pos, undefined, { svg }, undefined)
-    const newText = view.state.schema.text(newSrc)
-    tr.replaceWith(pos + 1, pos + currentNode.nodeSize - 1, newText)
+    const from = pos + 1
+    const to = pos + currentNode.nodeSize - 1
+    if (newSrc) {
+      tr.replaceWith(from, to, view.state.schema.text(newSrc))
+    } else {
+      tr.delete(from, to)
+    }
     view.dispatch(tr)
     
     updateDom()
