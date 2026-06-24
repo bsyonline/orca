@@ -2,6 +2,7 @@ import './App.css'
 import { useEffect, useState } from 'react'
 import { MilkdownProvider } from '@milkdown/react'
 import { FileTree } from './components/FileTree/FileTree'
+import { OpenDocsTree } from './components/OpenDocsTree/OpenDocsTree'
 import { Editor } from './components/Editor/Editor'
 import { useAppStore } from './store/useAppStore'
 
@@ -10,9 +11,18 @@ function isMarkdownFile(filePath: string): boolean {
 }
 
 export default function App() {
-  const { activeFile, activeFileContent, openFile, setFileTree, setWorkspaceRoot, setActiveFile, workspaceRoot } = useAppStore()
-  const [sidebarVisible, setSidebarVisible] = useState(workspaceRoot !== null)
+  const { activeFile, activeFileContent, openFile, setFileTree, setWorkspaceRoot, setActiveFile, workspaceRoot, openDocs, closeDoc } = useAppStore()
+  // Default visible so the open-docs tree appears as soon as a 2nd doc opens
+  // (no setState during open — which would add a spurious render). Focus mode /
+  // toggle-sidebar flip this to hide it. Workspace mode sets it explicitly on open.
+  const [sidebarVisible, setSidebarVisible] = useState(true)
   const [isDragOver, setIsDragOver] = useState(false)
+
+  // Single-file mode: show the open-docs sidebar when 2+ docs are open AND the
+  // user hasn't hidden it via focus mode / toggle-sidebar. Workspace mode keeps
+  // its existing user-controlled visibility.
+  const effectiveSidebarVisible =
+    workspaceRoot === null ? openDocs.length >= 2 && sidebarVisible : sidebarVisible
 
   const handleOpenFolder = async () => {
     const selectedPath = await window.api.openFolder()
@@ -20,7 +30,6 @@ export default function App() {
     if (isMarkdownFile(selectedPath)) {
       const content = await window.api.readFile(selectedPath)
       openFile(selectedPath, content)
-      setSidebarVisible(false)
     } else {
       setWorkspaceRoot(selectedPath)
       const tree = await window.api.listDir(selectedPath)
@@ -32,6 +41,26 @@ export default function App() {
   const handleFileSelect = async (filePath: string) => {
     const content = await window.api.readFile(filePath)
     openFile(filePath, content)
+  }
+
+  const handleSwitchDoc = async (filePath: string) => {
+    if (filePath === activeFile) return
+    const content = await window.api.readFile(filePath)
+    openFile(filePath, content)
+  }
+
+  const handleCloseDoc = async (filePath: string) => {
+    const next = closeDoc(filePath)
+    // Only the active doc closing should change which doc is active. Closing a
+    // background doc just removes it from the list (closeDoc already did that).
+    if (filePath === activeFile) {
+      if (next) {
+        const content = await window.api.readFile(next)
+        openFile(next, content)
+      } else {
+        setActiveFile(null)
+      }
+    }
   }
 
   const handleNewFile = async () => {
@@ -71,7 +100,6 @@ export default function App() {
     const cleanup = window.api.onOpenFile(async (filePath) => {
       const content = await window.api.readFile(filePath)
       openFile(filePath, content)
-      setSidebarVisible(false)
     })
     window.api.rendererReady()
     return cleanup
@@ -143,29 +171,38 @@ export default function App() {
   }, [activeFile])
 
   return (
-    <MilkdownProvider>
-      <div className={`app${sidebarVisible ? '' : ' sidebar-hidden'}`}>
-        <div className="app-body">
-          {sidebarVisible && (
-            <aside className="sidebar">
+    <div className={`app${effectiveSidebarVisible ? '' : ' sidebar-hidden'}`}>
+      <div className="app-body">
+        {effectiveSidebarVisible && (
+          <aside className="sidebar">
+            {workspaceRoot ? (
               <FileTree onOpenFolder={handleOpenFolder} onFileSelect={handleFileSelect} onNewFile={handleNewFile} />
-            </aside>
-          )}
-          <main
-            className={`editor-area${isDragOver ? ' drag-over' : ''}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <div className="titlebar-drag" />
-            {activeFile ? (
-              <Editor key={activeFile} filePath={activeFile} initialContent={activeFileContent} />
             ) : (
-              <div className="editor-empty">从左侧打开文件夹，选择一个 .md 文件开始编辑</div>
+              <OpenDocsTree openDocs={openDocs} onSelect={handleSwitchDoc} onClose={handleCloseDoc} />
             )}
-          </main>
-        </div>
+          </aside>
+        )}
+        <main
+          className={`editor-area${isDragOver ? ' drag-over' : ''}`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className="titlebar-drag" />
+          {activeFile ? (
+            // Key the provider (not just the Editor) by file path so each document
+            // gets a fresh Milkdown instance, factory, and root element. A single
+            // long-lived provider shares one editor `div`, and async create() calls
+            // from the previous document can resolve late and overwrite the new one
+            // — which left the editor showing the previously opened file.
+            <MilkdownProvider key={activeFile}>
+              <Editor filePath={activeFile} initialContent={activeFileContent} />
+            </MilkdownProvider>
+          ) : (
+            <div className="editor-empty">从左侧打开文件夹，选择一个 .md 文件开始编辑</div>
+          )}
+        </main>
       </div>
-    </MilkdownProvider>
+    </div>
   )
 }
