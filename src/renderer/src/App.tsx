@@ -4,6 +4,7 @@ import { MilkdownProvider } from '@milkdown/react'
 import { FileTree } from './components/FileTree/FileTree'
 import { OpenDocsTree } from './components/OpenDocsTree/OpenDocsTree'
 import { Editor } from './components/Editor/Editor'
+import { EditorErrorBoundary } from './components/Editor/EditorErrorBoundary'
 import { useAppStore } from './store/useAppStore'
 
 function isMarkdownFile(filePath: string): boolean {
@@ -190,14 +191,19 @@ export default function App() {
         >
           <div className="titlebar-drag" />
           {activeFile ? (
-            // Key the provider (not just the Editor) by file path so each document
-            // gets a fresh Milkdown instance, factory, and root element. A single
-            // long-lived provider shares one editor `div`, and async create() calls
-            // from the previous document can resolve late and overwrite the new one
-            // — which left the editor showing the previously opened file.
-            <MilkdownProvider key={activeFile}>
-              <Editor filePath={activeFile} initialContent={activeFileContent} />
-            </MilkdownProvider>
+            // Key the editor subtree by file path so each document gets a fresh
+            // Milkdown instance, factory, and root element. A single long-lived
+            // provider shares one editor `div`, and async create() calls from the
+            // previous document can resolve late and overwrite the new one — which
+            // left the editor showing the previously opened file. The key lives on
+            // the error boundary (the outermost element), so remounting it also
+            // remounts the provider, and a per-file boundary keeps a crash in one
+            // document from blanking the others.
+            <EditorErrorBoundary key={activeFile}>
+              <MilkdownProvider>
+                <Editor filePath={activeFile} initialContent={activeFileContent} />
+              </MilkdownProvider>
+            </EditorErrorBoundary>
           ) : (
             <div className="editor-empty">从左侧打开文件夹，选择一个 .md 文件开始编辑</div>
           )}

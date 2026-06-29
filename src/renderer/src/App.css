@@ -105,6 +105,26 @@ button { font-family: inherit; }
   font-size: 14px;
 }
 
+.editor-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: 100%;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+.editor-error button {
+  padding: 6px 16px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+}
+
 .editor-area.drag-over::after {
   content: '松开以打开文件';
   position: absolute;

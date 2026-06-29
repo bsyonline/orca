@@ -29,7 +29,7 @@ import { history } from '@milkdown/kit/plugin/history'
 import { prism, prismConfig } from '@milkdown/plugin-prism'
 import { Milkdown, useEditor, useInstance } from '@milkdown/react'
 import { getMarkdown, callCommand, insert, replaceAll } from '@milkdown/kit/utils'
-import { TextSelection } from '@milkdown/kit/prose/state'
+import { TextSelection, Selection } from '@milkdown/kit/prose/state'
 import { useAppStore } from '../../store/useAppStore'
 import { handleImagePaste, handleImageDrop } from '../../lib/imageHandler'
 import { buildHTMLDocument } from '../../lib/exporters/html'
@@ -113,7 +113,46 @@ export function Editor({ filePath, initialContent }: EditorProps) {
       .use(mermaidProsePlugin),
   )
 
-  const [, getInstance] = useInstance()
+  const [loading, getInstance] = useInstance()
+
+  // Auto-focus the editor once it finishes creating so the user can type
+  // immediately without first clicking. Place the caret at the END of the
+  // document (so typing continues where the content left off), but do NOT scroll
+  // there: ProseMirror's focus() uses preventScroll and a selection-only
+  // transaction never scrolls, so the view stays at the top for reading. The
+  // scrollTop reset is a defensive guarantee that long docs open at the top.
+  //
+  // The whole action is wrapped in try/catch and retried: Milkdown's create()
+  // is async and racy (StrictMode/HMR can recreate the editor), and ctx.get()
+  // THROWS (not returns undefined) when the editor view isn't injected yet.
+  // An uncaught throw here would unmount the whole React tree (blank screen), so
+  // we swallow it and retry briefly until the view is ready.
+  useEffect(() => {
+    if (loading) return
+    let timer: ReturnType<typeof setTimeout> | undefined
+    let attempts = 0
+    const tryFocus = () => {
+      const instance = getInstance()
+      if (instance) {
+        try {
+          instance.action((ctx) => {
+            const view = ctx.get(editorViewCtx)
+            if (!view) throw new Error('editor view not ready')
+            if (view.hasFocus()) return
+            view.dispatch(view.state.tr.setSelection(Selection.atEnd(view.state.doc)))
+            view.focus()
+            if (editorRef.current) editorRef.current.scrollTop = 0
+          })
+          return
+        } catch {
+          // Editor still settling; fall through and retry.
+        }
+      }
+      if (attempts++ < 10) timer = setTimeout(tryFocus, 50)
+    }
+    timer = setTimeout(tryFocus, 0)
+    return () => clearTimeout(timer)
+  }, [loading, filePath, getInstance])
 
   const handleTableConfirm = useCallback(
     (rows: number, cols: number) => {
