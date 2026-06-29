@@ -35,15 +35,23 @@ function openFileInApp(filePath: string): void {
   if (!isMarkdownFile(filePath)) return
   app.addRecentDocument(filePath)
 
-  const win = BrowserWindow.getAllWindows()[0]
+  // Route the file to the window the user is actually looking at, not always the
+  // first one. With multiple windows/tabs open, sending to getAllWindows()[0]
+  // (or a single shared renderer target) opened the file in the wrong window.
+  const win =
+    BrowserWindow.getFocusedWindow() ??
+    BrowserWindow.getAllWindows().find((w) => !w.isDestroyed()) ??
+    null
+
   if (win && !win.isDestroyed()) {
     if (win.isMinimized()) win.restore()
     win.show()
-    openFileCoordinator.openFile(filePath)
+    win.focus()
+    openFileCoordinator.openFile(filePath, win.webContents.id)
     return
   }
 
-  openFileCoordinator.openFile(filePath)
+  openFileCoordinator.openFile(filePath, null)
   if (app.isReady()) createWindow()
 }
 
@@ -354,11 +362,12 @@ app.whenReady().then(() => {
     const win = BrowserWindow.fromWebContents(event.sender)
     if (!win || win.isDestroyed()) return
 
+    const id = event.sender.id
     const sender = (filePath: string) => {
       if (!win.isDestroyed()) sendOpenFile(win, filePath)
     }
-    openFileCoordinator.markRendererReady(sender)
-    win.once('closed', () => openFileCoordinator.clearRenderer(sender))
+    openFileCoordinator.markRendererReady(id, sender)
+    win.once('closed', () => openFileCoordinator.clearRenderer(id))
   })
 
   createWindow()

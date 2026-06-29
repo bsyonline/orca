@@ -74,9 +74,17 @@ export function Editor({ filePath, initialContent }: EditorProps) {
 
   useEffect(() => {
     return () => {
-      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      // Flush any pending debounced save before this editor unmounts. Switching
+      // files within the 1s debounce window used to clearTimeout the pending
+      // write, silently dropping the just-made edits. sourceMdRef holds the
+      // latest restored markdown for this file.
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current)
+        saveTimerRef.current = null
+        window.api.writeFile(filePath, sourceMdRef.current)
+      }
     }
-  }, [])
+  }, [filePath])
 
   useEditor((root) =>
     MilkdownCoreEditor.make()
