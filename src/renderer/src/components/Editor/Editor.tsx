@@ -29,7 +29,7 @@ import { history } from '@milkdown/kit/plugin/history'
 import { prism, prismConfig } from '@milkdown/plugin-prism'
 import { Milkdown, useEditor, useInstance } from '@milkdown/react'
 import { getMarkdown, callCommand, insert, replaceAll } from '@milkdown/kit/utils'
-import { TextSelection, Selection } from '@milkdown/kit/prose/state'
+import { TextSelection, Selection, EditorState, Transaction } from '@milkdown/kit/prose/state'
 import { useAppStore } from '../../store/useAppStore'
 import { handleImagePaste, handleImageDrop } from '../../lib/imageHandler'
 import { buildHTMLDocument } from '../../lib/exporters/html'
@@ -85,6 +85,32 @@ export function Editor({ filePath, initialContent }: EditorProps) {
       }
     }
   }, [filePath])
+
+  const isAtTableFirstRowFirstCell = (state: EditorState): boolean => {
+    const { $from } = state.selection
+    
+    for (let d = $from.depth; d >= 0; d--) {
+      const node = $from.node(d)
+      if (node.type.name === 'table') {
+        const tablePos = $from.before(d)
+        
+        if (tablePos !== 0) return false
+        
+        const tableNode = node
+        if (tableNode.childCount === 0) return false
+        
+        const firstRow = tableNode.child(0)
+        if (firstRow.childCount === 0) return false
+        
+        const firstCellStart = tablePos + 2
+        const firstCellEnd = firstCellStart + firstRow.child(0).nodeSize
+        
+        return $from.pos >= firstCellStart && $from.pos <= firstCellEnd
+      }
+    }
+    
+    return false
+  }
 
   useEditor((root) =>
     MilkdownCoreEditor.make()
