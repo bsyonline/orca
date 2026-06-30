@@ -228,6 +228,15 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       colBtns.push({ add: addBtn, del: delBtn })
     })
 
+    // Build table delete button (top-right corner)
+    const tableDeleteBtn = document.createElement('button')
+    tableDeleteBtn.type = 'button'
+    tableDeleteBtn.className = 'table-edge-btn table-delete-table-btn'
+    tableDeleteBtn.innerHTML = TrashIcon
+    tableDeleteBtn.style.opacity = '0'
+    tableDeleteBtn.addEventListener('click', (e) => { e.preventDefault(); handleDeleteTable(table) })
+    overlay.appendChild(tableDeleteBtn)
+
     // Coordinate-based hover: use mousemove on <table> so ProseMirror <tr> replacements don't break it
     let activeRow = -1
     let activeCol = -1
