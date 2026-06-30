@@ -57,3 +57,9 @@
   cursor: not-allowed;
   pointer-events: none;
 }
+
+.table-delete-table-btn {
+  top: -25px;
+  right: -25px;
+  opacity: 0;
+}
