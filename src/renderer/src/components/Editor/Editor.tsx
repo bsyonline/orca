@@ -74,8 +74,24 @@ export function isAtTableFirstRowFirstCell(state: EditorState): boolean {
   return false
 }
 
-// Reference Transaction to suppress unused import warning - will be used in Task 3
-void Transaction
+// Will be used in Task 4 - exported for internal module use
+export function insertParagraphBeforeTable(state: EditorState, dispatch: (tr: Transaction) => void): boolean {
+  const { $from } = state.selection
+  
+  for (let d = $from.depth; d >= 0; d--) {
+    const node = $from.node(d)
+    if (node.type.name === 'table') {
+      const tablePos = $from.before(d)
+      const paragraph = state.schema.nodes.paragraph.create()
+      const tr = state.tr.insert(tablePos, paragraph)
+      tr.setSelection(TextSelection.create(tr.doc, tablePos + 1))
+      dispatch(tr)
+      return true
+    }
+  }
+  
+  return false
+}
 
 export function Editor({ filePath, initialContent }: EditorProps) {
   const { setIsDirty } = useAppStore()
