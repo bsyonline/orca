@@ -10,26 +10,28 @@
   width: 20px;
   height: 20px;
   box-sizing: border-box;
-  border-radius: 50%;
-  background: var(--border-sub);
-  border: 1px solid var(--border-def);
+  background: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 0 2px 0;
+  padding: 0;
   margin: 0;
-  line-height: 1;
-  font-size: 13px;
-  font-weight: 400;
   color: var(--ink-3);
   cursor: pointer;
   pointer-events: auto;
-  transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
 .table-edge-btn:hover {
-  background: var(--accent-soft-strong);
   transform: scale(1.1);
+}
+
+.table-edge-btn svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex-shrink: 0;
 }
 
 .table-add-row-btn {
@@ -38,21 +40,6 @@
 
 .table-add-col-btn {
   bottom: -25px;
-  transform: none;
-}
-
-.table-add-col-btn:hover {
-  transform: scale(1.1);
-}
-
-.table-delete-btn {
-  background: var(--danger-soft);
-  border: 1px solid var(--danger-border);
-  color: var(--danger-text);
-}
-
-.table-delete-btn:hover {
-  background: var(--danger-hover);
 }
 
 .table-delete-row-btn {

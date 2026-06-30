@@ -6,6 +6,34 @@ import { editorViewCtx } from '@milkdown/kit/core'
 import { TextSelection } from '@milkdown/kit/prose/state'
 import { deleteRow, deleteColumn } from '@milkdown/prose/tables'
 
+const PlusRowIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="13" height="7" x="3" y="3" rx="1" />
+  <path d="m22 15-3-3 3-3" />
+  <rect width="13" height="7" x="3" y="14" rx="1" />
+</svg>`
+
+const MinusRowIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M10 11v6" />
+  <path d="M14 11v6" />
+  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+  <path d="M3 6h18" />
+  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+</svg>`
+
+const PlusColIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="7" height="13" x="3" y="3" rx="1" />
+  <path d="m9 22 3-3 3 3" />
+  <rect width="7" height="13" x="14" y="3" rx="1" />
+</svg>`
+
+const MinusColIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M10 11v6" />
+  <path d="M14 11v6" />
+  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+  <path d="M3 6h18" />
+  <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+</svg>`
+
 interface TableEdgeButtonsProps {
   editorRef: React.RefObject<HTMLDivElement>
   getInstance: ReturnType<typeof import('@milkdown/react').useInstance>[1]
@@ -114,7 +142,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       const addBtn = document.createElement('button')
       addBtn.type = 'button'
       addBtn.className = 'table-edge-btn table-add-row-btn'
-      addBtn.textContent = '+'
+      addBtn.innerHTML = PlusRowIcon
       addBtn.style.top = `${rowBottom - 10}px`
       addBtn.style.opacity = '0'
       addBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddRow(table, rowIndex) })
@@ -123,7 +151,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       const delBtn = document.createElement('button')
       delBtn.type = 'button'
       delBtn.className = 'table-edge-btn table-delete-btn table-delete-row-btn'
-      delBtn.textContent = '−'
+      delBtn.innerHTML = MinusRowIcon
       delBtn.style.top = `${rowTop + (rowBottom - rowTop) / 2 - 10}px`
       delBtn.style.opacity = '0'
       if (rowCount <= 1) delBtn.classList.add('table-edge-btn-disabled')
@@ -143,7 +171,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       const addBtn = document.createElement('button')
       addBtn.type = 'button'
       addBtn.className = 'table-edge-btn table-add-col-btn'
-      addBtn.textContent = '+'
+      addBtn.innerHTML = PlusColIcon
       addBtn.style.left = `${colRight - 10}px`
       addBtn.style.opacity = '0'
       addBtn.addEventListener('click', (e) => { e.preventDefault(); handleAddCol(table, colIndex) })
@@ -152,7 +180,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       const delBtn = document.createElement('button')
       delBtn.type = 'button'
       delBtn.className = 'table-edge-btn table-delete-btn table-delete-col-btn'
-      delBtn.textContent = '−'
+      delBtn.innerHTML = MinusColIcon
       delBtn.style.left = `${colLeft + (colRight - colLeft) / 2 - 10}px`
       delBtn.style.opacity = '0'
       if (colCount <= 1) delBtn.classList.add('table-edge-btn-disabled')
