@@ -298,6 +298,16 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       }, 50)
     }
 
+    const repositionAll = () => {
+      tablesRef.current.forEach((table) => {
+        const overlay = overlaysRef.current.get(table)
+        if (overlay) {
+          positionOverlay(table, overlay)
+          updateButtons(table, overlay)
+        }
+      })
+    }
+
     processTables()
     const t1 = setTimeout(processTables, 200)
     const t2 = setTimeout(processTables, 600)
@@ -306,9 +316,12 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     const editorObserver = new MutationObserver(processTables)
     editorObserver.observe(editor, { childList: true, subtree: true })
 
+    window.addEventListener('resize', repositionAll)
+
     return () => {
       clearTimeout(t1); clearTimeout(t2); clearTimeout(t3)
       editorObserver.disconnect()
+      window.removeEventListener('resize', repositionAll)
       observersRef.current.forEach((obs) => obs.disconnect())
       observersRef.current.clear()
       buttonControllersRef.current.forEach((ac) => ac.abort())
@@ -317,7 +330,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       overlaysRef.current.clear()
       tablesRef.current.clear()
     }
-  }, [editorRef, attachTable])
+  }, [editorRef, attachTable, positionOverlay, updateButtons])
 
   return null
 }
