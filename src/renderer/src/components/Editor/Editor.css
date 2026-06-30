@@ -295,7 +295,7 @@
 .milkdown table, .milkdown .ProseMirror table {
   border-collapse: collapse;
   width: 100%;
-  margin: 14px 0;
+  margin: 32px 0;
   font-size: 14px;
 }
 
