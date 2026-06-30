@@ -5,24 +5,31 @@ function isMarkdownFile(filePath: string): boolean {
 }
 
 export function createOpenFileCoordinator() {
+  // Files that arrived before any renderer was ready (cold start). Drained to
+  // the first renderer that becomes ready.
   const pendingOpenFiles: string[] = []
-  let sendOpenFile: SendOpenFile | null = null
+  // Ready renderers keyed by their webContents id, so an "open with" request can
+  // be routed to a specific (focused) window instead of one shared target.
+  const senders = new Map<number, SendOpenFile>()
 
   return {
-    openFile(filePath: string): boolean {
+    openFile(filePath: string, targetId?: number | null): boolean {
       if (!isMarkdownFile(filePath)) return false
 
-      if (sendOpenFile) {
-        sendOpenFile(filePath)
+      const sender = targetId != null ? senders.get(targetId) : undefined
+      if (sender) {
+        sender(filePath)
       } else {
+        // No ready target window yet (cold start, or the target is still
+        // loading) — queue until a renderer signals ready.
         pendingOpenFiles.push(filePath)
       }
 
       return true
     },
 
-    markRendererReady(sender: SendOpenFile): void {
-      sendOpenFile = sender
+    markRendererReady(id: number, sender: SendOpenFile): void {
+      senders.set(id, sender)
 
       while (pendingOpenFiles.length > 0) {
         const filePath = pendingOpenFiles.shift()
@@ -30,8 +37,8 @@ export function createOpenFileCoordinator() {
       }
     },
 
-    clearRenderer(sender: SendOpenFile): void {
-      if (sendOpenFile === sender) sendOpenFile = null
+    clearRenderer(id: number): void {
+      senders.delete(id)
     },
   }
 }

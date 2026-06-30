@@ -81,6 +81,14 @@ vi.mock('@milkdown/kit/utils', () => ({
   replaceAll: vi.fn(),
 }))
 
+// Avoid loading the real mermaid plugin: its node schema ($nodeSchema) runs at
+// import time and isn't part of the mocked @milkdown/kit/utils surface.
+vi.mock('../plugins/mermaid', () => ({
+  mermaidSchema: 'mermaid-schema',
+  mermaidRemarkPlugin: 'mermaid-remark',
+  mermaidProsePlugin: 'mermaid-prose',
+}))
+
 vi.mock('@milkdown/kit/prose/state', () => ({
   TextSelection: { create: vi.fn() },
 }))

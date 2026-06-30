@@ -11,6 +11,15 @@
 .milkdown .ProseMirror:focus { outline: none !important; }
 .ProseMirror-focused { outline: none !important; }
 
+/* Make gapcursor more visible in empty documents */
+.ProseMirror-gapcursor:after {
+  border-top-width: 2px;
+  border-top-color: var(--ink);
+}
+.ProseMirror-focused .ProseMirror-gapcursor {
+  display: block;
+}
+
 /* Content column */
 .milkdown .ProseMirror {
   max-width: 680px;
@@ -20,6 +29,8 @@
   color: var(--ink-2);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', sans-serif;
+  caret-color: var(--ink);
+  min-height: 100px;
 }
 
 /* Headings */
@@ -120,6 +131,22 @@
 
 /* Paragraphs */
 .milkdown p, .milkdown .ProseMirror p { margin: 0.85em 0; }
+
+/* Empty paragraph placeholder */
+.milkdown .ProseMirror p:empty::before {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 18px;
+  background: var(--ink);
+  animation: cursor-pulse 1s ease-in-out infinite;
+  vertical-align: text-bottom;
+}
+
+@keyframes cursor-pulse {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
 
 /* Inline styles */
 .milkdown strong, .milkdown .ProseMirror strong { font-weight: 600; color: var(--ink); }
