@@ -264,6 +264,7 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
         activeRow = -1; activeCol = -1
         rowBtns.forEach(({ add, del }) => { add.style.opacity = '0'; del.style.opacity = '0' })
         colBtns.forEach(({ add, del }) => { add.style.opacity = '0'; del.style.opacity = '0' })
+        tableDeleteBtn.style.opacity = '0'
         hideTimer = null
       }, 80)
     }
@@ -286,6 +287,10 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       })
       setRow(row)
       setCol(col)
+      // Show table delete button whenever mouse is in table
+      if (row >= 0 || col >= 0) {
+        tableDeleteBtn.style.opacity = '1'
+      }
     }, { signal })
 
     table.addEventListener('mouseleave', hideAll, { signal })
@@ -303,6 +308,9 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
       add.addEventListener('mouseleave', hideAll)
       del.addEventListener('mouseleave', hideAll)
     })
+    // Keep table delete button visible on hover
+    tableDeleteBtn.addEventListener('mouseenter', cancelHide)
+    tableDeleteBtn.addEventListener('mouseleave', hideAll)
   }, [handleAddRow, handleAddCol, handleDeleteRow, handleDeleteCol])
 
   const attachTable = useCallback((table: HTMLElement) => {
