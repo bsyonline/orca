@@ -256,7 +256,7 @@ describe('App sidebar width adjustment', () => {
     })
 
     await waitFor(() => {
-      const sidebar = document.querySelector('.sidebar')
+      const sidebar = document.querySelector('.sidebar') as HTMLElement | null
       const width = sidebar?.style.getPropertyValue('--sidebar-width')
       expect(parseInt(width || '240')).toBeLessThanOrEqual(300)
     })
