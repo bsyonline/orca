@@ -1,5 +1,5 @@
 import './SidebarResizer.css'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface SidebarResizerProps {
   currentWidth: number
@@ -16,6 +16,10 @@ export function SidebarResizer({
 }: SidebarResizerProps) {
   const [isDragging, _setIsDragging] = useState(false)
   const resizerRef = useRef<HTMLDivElement>(null)
+  
+  useEffect(() => {
+    // Drag logic will be implemented in Task 2
+  }, [])
   
   return (
     <div
