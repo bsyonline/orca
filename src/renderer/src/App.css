@@ -1,6 +1,4 @@
 :root {
-  --sidebar-width: 240px;
-
   --bg-page:    #FFFFFF;
   --bg-subtle:  #F0F0F0;
   --bg-sidebar: #F7F7F7;
@@ -59,8 +57,9 @@ button { font-family: inherit; }
 .app-body { display: flex; flex: 1; overflow: hidden; background: var(--bg-sidebar); }
 
 .sidebar {
+  position: relative;
   width: var(--sidebar-width);
-  min-width: var(--sidebar-width);
+  min-width: 80px;
   background: var(--bg-sidebar);
   overflow: hidden;
   display: flex;
