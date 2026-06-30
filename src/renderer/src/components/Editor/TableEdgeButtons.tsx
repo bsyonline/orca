@@ -114,6 +114,36 @@ export function TableEdgeButtons({ editorRef, getInstance }: TableEdgeButtonsPro
     })
   }, [getInstance, setSelectionToCell])
 
+  const handleDeleteTable = useCallback((table: HTMLElement) => {
+    const instance = getInstance()
+    if (!instance) return
+
+    if (!window.confirm('确认删除这个表格？')) return
+
+    instance.action((ctx) => {
+      const view = ctx.get(editorViewCtx)
+      if (!view) return
+
+      const tablePos = view.posAtDOM(table, 0)
+      if (tablePos < 0) return
+      const $tablePos = view.state.doc.resolve(tablePos)
+      let tableNodePos = -1
+      for (let d = $tablePos.depth; d >= 0; d--) {
+        const node = $tablePos.node(d)
+        if (node.type.name === 'table') {
+          tableNodePos = $tablePos.before(d)
+          break
+        }
+      }
+      if (tableNodePos < 0) return
+
+      const tableNode = view.state.doc.nodeAt(tableNodePos)
+      if (!tableNode) return
+      const tr = view.state.tr.delete(tableNodePos, tableNodePos + tableNode.nodeSize)
+      view.dispatch(tr)
+    })
+  }, [getInstance])
+
   const positionOverlay = useCallback((table: HTMLElement, overlay: HTMLElement) => {
     const editor = editorRef.current
     if (!editor) return
