@@ -79,6 +79,7 @@ vi.mock('@milkdown/kit/utils', () => ({
   callCommand: vi.fn(),
   insert: vi.fn(),
   replaceAll: vi.fn(),
+  $prose: vi.fn((plugin) => plugin),
 }))
 
 // Avoid loading the real mermaid plugin: its node schema ($nodeSchema) runs at
