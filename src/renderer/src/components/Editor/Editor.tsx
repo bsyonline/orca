@@ -65,10 +65,17 @@ export function isAtTableFirstRowFirstCell(state: EditorState): boolean {
       const firstRow = tableNode.child(0)
       if (firstRow.childCount === 0) return false
       
-      const firstCellStart = tablePos + 2
-      const firstCellEnd = firstCellStart + firstRow.child(0).nodeSize
+      const firstCell = firstRow.child(0)
       
-      return $from.pos >= firstCellStart && $from.pos <= firstCellEnd
+      // Position calculation per ProseMirror docs:
+      // tablePos: table node start position
+      // +1: enter table content (after opening tag)
+      // +1: enter row content (after row opening tag)
+      // +1: enter cell content (after cell opening tag)
+      const firstCellContentStart = tablePos + 3
+      const firstCellContentEnd = firstCellContentStart + firstCell.content.size
+      
+      return $from.pos >= firstCellContentStart && $from.pos <= firstCellContentEnd
     }
   }
   
