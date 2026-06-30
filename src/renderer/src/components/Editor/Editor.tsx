@@ -28,8 +28,9 @@ import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
 import { history } from '@milkdown/kit/plugin/history'
 import { prism, prismConfig } from '@milkdown/plugin-prism'
 import { Milkdown, useEditor, useInstance } from '@milkdown/react'
-import { getMarkdown, callCommand, insert, replaceAll } from '@milkdown/kit/utils'
+import { getMarkdown, callCommand, insert, replaceAll, $prose } from '@milkdown/kit/utils'
 import { TextSelection, Selection, EditorState, Transaction } from '@milkdown/kit/prose/state'
+import { keymap } from '@milkdown/kit/prose/keymap'
 import { useAppStore } from '../../store/useAppStore'
 import { handleImagePaste, handleImageDrop } from '../../lib/imageHandler'
 import { buildHTMLDocument } from '../../lib/exporters/html'
@@ -156,7 +157,16 @@ export function Editor({ filePath, initialContent }: EditorProps) {
       .use(listener)
       .use(mermaidSchema)
       .use(mermaidRemarkPlugin)
-      .use(mermaidProsePlugin),
+      .use(mermaidProsePlugin)
+      .use($prose(() => keymap({
+        'ArrowUp': (state, dispatch) => {
+          if (!dispatch) return false
+          if (isAtTableFirstRowFirstCell(state)) {
+            return insertParagraphBeforeTable(state, dispatch)
+          }
+          return false
+        }
+      }))),
   )
 
   const [loading, getInstance] = useInstance()
