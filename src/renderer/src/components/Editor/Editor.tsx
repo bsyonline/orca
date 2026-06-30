@@ -47,6 +47,36 @@ interface EditorProps {
   initialContent: string
 }
 
+// Will be used in Task 4 - exported for internal module use
+export function isAtTableFirstRowFirstCell(state: EditorState): boolean {
+  const { $from } = state.selection
+  
+  for (let d = $from.depth; d >= 0; d--) {
+    const node = $from.node(d)
+    if (node.type.name === 'table') {
+      const tablePos = $from.before(d)
+      
+      if (tablePos !== 0) return false
+      
+      const tableNode = node
+      if (tableNode.childCount === 0) return false
+      
+      const firstRow = tableNode.child(0)
+      if (firstRow.childCount === 0) return false
+      
+      const firstCellStart = tablePos + 2
+      const firstCellEnd = firstCellStart + firstRow.child(0).nodeSize
+      
+      return $from.pos >= firstCellStart && $from.pos <= firstCellEnd
+    }
+  }
+  
+  return false
+}
+
+// Reference Transaction to suppress unused import warning - will be used in Task 3
+void Transaction
+
 export function Editor({ filePath, initialContent }: EditorProps) {
   const { setIsDirty } = useAppStore()
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>( null)
@@ -85,32 +115,6 @@ export function Editor({ filePath, initialContent }: EditorProps) {
       }
     }
   }, [filePath])
-
-  const isAtTableFirstRowFirstCell = (state: EditorState): boolean => {
-    const { $from } = state.selection
-    
-    for (let d = $from.depth; d >= 0; d--) {
-      const node = $from.node(d)
-      if (node.type.name === 'table') {
-        const tablePos = $from.before(d)
-        
-        if (tablePos !== 0) return false
-        
-        const tableNode = node
-        if (tableNode.childCount === 0) return false
-        
-        const firstRow = tableNode.child(0)
-        if (firstRow.childCount === 0) return false
-        
-        const firstCellStart = tablePos + 2
-        const firstCellEnd = firstCellStart + firstRow.child(0).nodeSize
-        
-        return $from.pos >= firstCellStart && $from.pos <= firstCellEnd
-      }
-    }
-    
-    return false
-  }
 
   useEditor((root) =>
     MilkdownCoreEditor.make()

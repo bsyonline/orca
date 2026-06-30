@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { EditorState, TextSelection, Transaction } from '@milkdown/kit/prose/state'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { EditorState, TextSelection } from '@milkdown/kit/prose/state'
 import { Schema } from '@milkdown/kit/prose/model'
 
 describe('Table ArrowUp position detection', () => {
