@@ -22,6 +22,7 @@ export function SidebarResizer({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
+    console.log('[DEBUG] mousedown triggered')
     setIsDragging(true)
     setDragWidth(currentWidth)
     dragStartX.current = e.clientX
@@ -32,7 +33,12 @@ export function SidebarResizer({
     if (!isDragging) return
 
     const sidebar = resizerRef.current?.closest('.sidebar') as HTMLElement | null
-    if (!sidebar) return
+    console.log('[DEBUG] useEffect, sidebar:', sidebar, 'isDragging:', isDragging)
+    if (!sidebar) {
+      console.error('[DEBUG] Cannot find .sidebar parent!')
+      setIsDragging(false)
+      return
+    }
 
     const getMaxWidth = () => window.innerWidth * maxWidthRatio
     const clampWidth = (width: number) =>
@@ -41,6 +47,7 @@ export function SidebarResizer({
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - dragStartX.current
       const newWidth = clampWidth(dragStartWidth.current + deltaX)
+      console.log('[DEBUG] mousemove, deltaX:', deltaX, 'newWidth:', newWidth)
       setDragWidth(newWidth)
       
       // 直接修改sidebar元素宽度（绕过React）
@@ -51,6 +58,7 @@ export function SidebarResizer({
     }
 
     const handleMouseUp = (e: MouseEvent) => {
+      console.log('[DEBUG] mouseup')
       setIsDragging(false)
       
       // 计算最终宽度

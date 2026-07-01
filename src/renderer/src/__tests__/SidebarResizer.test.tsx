@@ -54,12 +54,14 @@ describe('SidebarResizer', () => {
 
   it('enters dragging state on mousedown', async () => {
     const { container } = render(
-      <SidebarResizer
-        currentWidth={240}
-        onWidthChange={mockOnWidthChange}
-        minWidth={minWidth}
-        maxWidthRatio={maxWidthRatio}
-      />
+      <div className="sidebar" style={{ width: '240px' }}>
+        <SidebarResizer
+          currentWidth={240}
+          onWidthChange={mockOnWidthChange}
+          minWidth={minWidth}
+          maxWidthRatio={maxWidthRatio}
+        />
+      </div>
     )
 
     const resizer = container.querySelector('.sidebar-resizer')!
