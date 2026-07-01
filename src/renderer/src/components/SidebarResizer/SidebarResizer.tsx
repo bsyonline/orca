@@ -15,6 +15,7 @@ export function SidebarResizer({
   maxWidthRatio,
 }: SidebarResizerProps) {
   const [isDragging, setIsDragging] = useState(false)
+  const [dragWidth, setDragWidth] = useState(currentWidth)
   const resizerRef = useRef<HTMLDivElement>(null)
   const dragStartX = useRef(0)
   const dragStartWidth = useRef(0)
@@ -22,6 +23,7 @@ export function SidebarResizer({
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
     setIsDragging(true)
+    setDragWidth(currentWidth)
     dragStartX.current = e.clientX
     dragStartWidth.current = currentWidth
   }
@@ -36,6 +38,7 @@ export function SidebarResizer({
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - dragStartX.current
       const newWidth = clampWidth(dragStartWidth.current + deltaX)
+      setDragWidth(newWidth)
       
       // 直接修改CSS变量（不触发渲染）
       document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`)
@@ -69,6 +72,12 @@ export function SidebarResizer({
       ref={resizerRef}
       className={`sidebar-resizer${isDragging ? ' dragging' : ''}`}
       onMouseDown={handleMouseDown}
-    />
+    >
+      {isDragging && (
+        <div className="sidebar-width-indicator">
+          {Math.round(dragWidth)}px
+        </div>
+      )}
+    </div>
   )
 }
