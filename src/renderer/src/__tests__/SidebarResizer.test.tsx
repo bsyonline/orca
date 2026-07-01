@@ -75,12 +75,14 @@ describe('SidebarResizer', () => {
     const setPropertySpy = vi.spyOn(document.documentElement.style, 'setProperty')
     
     const { container } = render(
-      <SidebarResizer
-        currentWidth={240}
-        onWidthChange={mockOnWidthChange}
-        minWidth={minWidth}
-        maxWidthRatio={maxWidthRatio}
-      />
+      <div className="sidebar" style={{ width: '240px' }}>
+        <SidebarResizer
+          currentWidth={240}
+          onWidthChange={mockOnWidthChange}
+          minWidth={minWidth}
+          maxWidthRatio={maxWidthRatio}
+        />
+      </div>
     )
 
     const resizer = container.querySelector('.sidebar-resizer')!
@@ -100,12 +102,14 @@ describe('SidebarResizer', () => {
 
   it('calls onWidthChange on mouseup', async () => {
     const { container } = render(
-      <SidebarResizer
-        currentWidth={240}
-        onWidthChange={mockOnWidthChange}
-        minWidth={minWidth}
-        maxWidthRatio={maxWidthRatio}
-      />
+      <div className="sidebar" style={{ width: '240px' }}>
+        <SidebarResizer
+          currentWidth={240}
+          onWidthChange={mockOnWidthChange}
+          minWidth={minWidth}
+          maxWidthRatio={maxWidthRatio}
+        />
+      </div>
     )
 
     const resizer = container.querySelector('.sidebar-resizer')!
@@ -124,12 +128,14 @@ describe('SidebarResizer', () => {
 
   it('constrains width to minimum', async () => {
     const { container } = render(
-      <SidebarResizer
-        currentWidth={240}
-        onWidthChange={mockOnWidthChange}
-        minWidth={minWidth}
-        maxWidthRatio={maxWidthRatio}
-      />
+      <div className="sidebar" style={{ width: '240px' }}>
+        <SidebarResizer
+          currentWidth={240}
+          onWidthChange={mockOnWidthChange}
+          minWidth={minWidth}
+          maxWidthRatio={maxWidthRatio}
+        />
+      </div>
     )
 
     const resizer = container.querySelector('.sidebar-resizer')!
@@ -147,12 +153,14 @@ describe('SidebarResizer', () => {
 
   it('constrains width to maximum (50% of window)', async () => {
     const { container } = render(
-      <SidebarResizer
-        currentWidth={240}
-        onWidthChange={mockOnWidthChange}
-        minWidth={minWidth}
-        maxWidthRatio={maxWidthRatio}
-      />
+      <div className="sidebar" style={{ width: '240px' }}>
+        <SidebarResizer
+          currentWidth={240}
+          onWidthChange={mockOnWidthChange}
+          minWidth={minWidth}
+          maxWidthRatio={maxWidthRatio}
+        />
+      </div>
     )
 
     const resizer = container.querySelector('.sidebar-resizer')!
