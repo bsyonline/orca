@@ -189,10 +189,10 @@ export default function App() {
   }, [sidebarWidth])
 
   return (
-    <div className={`app${effectiveSidebarVisible ? '' : ' sidebar-hidden'}`}>
+    <div className={`app${effectiveSidebarVisible ? '' : ' sidebar-hidden'}`} style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties}>
       <div className="app-body">
         {effectiveSidebarVisible && (
-          <aside className="sidebar" style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties}>
+          <aside className="sidebar">
             {workspaceRoot ? (
               <FileTree onOpenFolder={handleOpenFolder} onFileSelect={handleFileSelect} onNewFile={handleNewFile} />
             ) : (
