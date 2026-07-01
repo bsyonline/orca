@@ -89,7 +89,53 @@ button { font-family: inherit; }
   z-index: 10;
 }
 
-.sidebar-hidden .titlebar-drag { left: 0; }
+.titlebar-content {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: 38px;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.sidebar-hidden .titlebar-drag,
+.sidebar-hidden .titlebar-content { left: 0; }
+
+.document-title {
+  -webkit-app-region: no-drag;
+  max-width: min(360px, calc(100vw - 220px));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-2);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 38px;
+  pointer-events: auto;
+}
+
+.titlebar-word-count {
+  -webkit-app-region: no-drag;
+  position: fixed;
+  top: 0;
+  right: 18px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.document-title:hover .titlebar-word-count {
+  opacity: 1;
+}
 
 .sidebar-hidden .editor-area {
   margin-left: 0;

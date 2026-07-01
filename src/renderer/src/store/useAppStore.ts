@@ -12,6 +12,7 @@ interface AppState {
   openFile: (path: string, content: string) => void
   closeDoc: (path: string) => string | null
   setActiveFile: (path: string | null) => void
+  setActiveFileContent: (content: string) => void
   setFileTree: (tree: FileNode[]) => void
   setIsDirty: (dirty: boolean) => void
 }
@@ -42,6 +43,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     return next[idx - 1] ?? next[0]
   },
   setActiveFile: (path) => set({ activeFile: path, isDirty: false }),
+  setActiveFileContent: (content) => set({ activeFileContent: content }),
   setFileTree: (tree) => set({ fileTree: tree }),
   setIsDirty: (dirty) => set({ isDirty: dirty }),
 }))

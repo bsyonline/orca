@@ -102,7 +102,7 @@ export function insertParagraphBeforeTable(state: EditorState, dispatch: (tr: Tr
 }
 
 export function Editor({ filePath, initialContent }: EditorProps) {
-  const { setIsDirty } = useAppStore()
+  const { setActiveFileContent, setIsDirty } = useAppStore()
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>( null)
   const [sourceMode, setSourceMode] = useState(false)
   const [sourceContent, setSourceContent] = useState('')
@@ -118,12 +118,13 @@ export function Editor({ filePath, initialContent }: EditorProps) {
       setIsDirty(true)
       const restoredMarkdown = restoreImagePath(markdown, filePath)
       sourceMdRef.current = restoredMarkdown
+      setActiveFileContent(restoredMarkdown)
       saveTimerRef.current = setTimeout(async () => {
         await window.api.writeFile(filePath, restoredMarkdown)
         setIsDirty(false)
       }, 1000)
     },
-    [filePath, setIsDirty],
+    [filePath, setActiveFileContent, setIsDirty],
   )
 
   useEffect(() => {

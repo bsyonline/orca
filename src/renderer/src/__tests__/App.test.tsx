@@ -68,7 +68,7 @@ function makeApi(overrides: Record<string, unknown> = {}) {
 
 describe('App drag-and-drop', () => {
   beforeEach(() => {
-    useAppStore.setState({ workspaceRoot: null, fileTree: [], activeFile: null })
+    useAppStore.setState({ workspaceRoot: null, fileTree: [], activeFile: null, isDirty: false })
     Object.defineProperty(window, 'api', {
       value: makeApi(),
       writable: true,
@@ -175,6 +175,62 @@ describe('App drag-and-drop', () => {
     })
 
     expect(readFile).not.toHaveBeenCalled()
+  })
+
+  it('shows unsaved status for a dirty active document', () => {
+    useAppStore.setState({
+      activeFile: '/docs/note.md',
+      activeFileContent: '# test',
+      isDirty: true,
+      openDocs: ['/docs/note.md'],
+    })
+
+    render(<App />)
+
+    expect(document.querySelector('.document-title')).toHaveTextContent('note.md--已编辑')
+    expect(document.querySelector('.statusbar')).toBeNull()
+  })
+
+  it('shows only the document name in the titlebar when saved', () => {
+    useAppStore.setState({
+      activeFile: '/docs/note.md',
+      activeFileContent: '# test',
+      isDirty: false,
+      openDocs: ['/docs/note.md'],
+    })
+
+    render(<App />)
+
+    expect(document.querySelector('.document-title')).toHaveTextContent('note.md')
+  })
+
+  it('shows word count in the top right when hovering the document title', () => {
+    useAppStore.setState({
+      activeFile: '/docs/note.md',
+      activeFileContent: 'hello world\n中文',
+      isDirty: false,
+      openDocs: ['/docs/note.md'],
+    })
+
+    render(<App />)
+
+    expect(document.querySelector('.titlebar-word-count')).toHaveTextContent('字数 4')
+  })
+
+  it('marks window close as cancellable when active document is dirty', () => {
+    useAppStore.setState({
+      activeFile: '/docs/note.md',
+      activeFileContent: '# test',
+      isDirty: true,
+      openDocs: ['/docs/note.md'],
+    })
+
+    render(<App />)
+
+    const event = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(event)
+
+    expect(event.defaultPrevented).toBe(true)
   })
 })
 

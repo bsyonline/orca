@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, act } from '@testing-library/react'
 import { Editor } from '../components/Editor/Editor'
+import { useAppStore } from '../store/useAppStore'
 
 // Capture the markdownUpdated listener the editor registers so the test can
 // simulate the user typing.
@@ -83,6 +84,7 @@ describe('Editor flushes pending edits on unmount', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     markdownListener = undefined
+    useAppStore.setState({ activeFile: '/docs/A.md', activeFileContent: '# A', isDirty: false })
     Object.defineProperty(window, 'api', {
       value: new Proxy(
         { writeFile: vi.fn() },
@@ -119,5 +121,16 @@ describe('Editor flushes pending edits on unmount', () => {
 
     const writeFile = (window.api.writeFile as ReturnType<typeof vi.fn>)
     expect(writeFile).toHaveBeenCalledWith('/docs/A.md', '# A edited')
+  })
+
+  it('syncs latest markdown into app state while editing', () => {
+    render(<Editor filePath="/docs/A.md" initialContent="# A" />)
+
+    expect(markdownListener).toBeTypeOf('function')
+    act(() => {
+      markdownListener!({}, '# A edited')
+    })
+
+    expect(useAppStore.getState().activeFileContent).toBe('# A edited')
   })
 })

@@ -30,6 +30,13 @@ describe('useAppStore', () => {
     expect(useAppStore.getState().isDirty).toBe(true)
   })
 
+  it('sets active file content without changing the active path', () => {
+    useAppStore.getState().openFile('/docs/a.md', '# A')
+    useAppStore.getState().setActiveFileContent('# A edited')
+    expect(useAppStore.getState().activeFile).toBe('/docs/a.md')
+    expect(useAppStore.getState().activeFileContent).toBe('# A edited')
+  })
+
   it('sets fileTree', () => {
     const tree = [{ name: 'note.md', path: '/docs/note.md', type: 'file' as const }]
     useAppStore.getState().setFileTree(tree)

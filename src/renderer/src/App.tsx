@@ -7,6 +7,7 @@ import { Editor } from './components/Editor/Editor'
 import { EditorErrorBoundary } from './components/Editor/EditorErrorBoundary'
 import { SidebarResizer } from './components/SidebarResizer/SidebarResizer'
 import { useAppStore } from './store/useAppStore'
+import { basename } from './lib/pathUtils'
 
 const MIN_SIDEBAR_WIDTH = 80
 const MAX_SIDEBAR_WIDTH_RATIO = 0.5
@@ -15,14 +16,31 @@ function isMarkdownFile(filePath: string): boolean {
   return /\.(md|markdown)$/i.test(filePath)
 }
 
+function countWords(markdown: string): number {
+  const text = markdown
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/!\[[^\]]*]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]+)]\([^)]*\)/g, '$1')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/[*_~>#-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!text) return 0
+  const tokens = text.match(/[\p{Script=Han}]|[A-Za-z0-9]+(?:['-][A-Za-z0-9]+)*/gu)
+  return tokens?.length ?? 0
+}
+
 export default function App() {
-  const { activeFile, activeFileContent, openFile, setFileTree, setWorkspaceRoot, setActiveFile, workspaceRoot, openDocs, closeDoc } = useAppStore()
+  const { activeFile, activeFileContent, openFile, setFileTree, setWorkspaceRoot, setActiveFile, workspaceRoot, isDirty, openDocs, closeDoc } = useAppStore()
   // Default visible so the open-docs tree appears as soon as a 2nd doc opens
   // (no setState during open — which would add a spurious render). Focus mode /
   // toggle-sidebar flip this to hide it. Workspace mode sets it explicitly on open.
   const [sidebarVisible, setSidebarVisible] = useState(true)
   const [isDragOver, setIsDragOver] = useState(false)
   const [sidebarWidth, setSidebarWidth] = useState(240)
+  const documentTitle = activeFile ? `${basename(activeFile)}${isDirty ? '--已编辑' : ''}` : ''
+  const wordCount = countWords(activeFileContent)
 
   // Single-file mode: show the open-docs sidebar when 2+ docs are open AND the
   // user hasn't hidden it via focus mode / toggle-sidebar. Workspace mode keeps
@@ -56,6 +74,9 @@ export default function App() {
   }
 
   const handleCloseDoc = async (filePath: string) => {
+    if (filePath === activeFile && isDirty && !window.confirm('当前文档有未保存的修改，是否保存并关闭？')) {
+      return
+    }
     const next = closeDoc(filePath)
     // Only the active doc closing should change which doc is active. Closing a
     // background doc just removes it from the list (closeDoc already did that).
@@ -188,6 +209,16 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [sidebarWidth])
 
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!activeFile || !isDirty) return
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+  }, [activeFile, isDirty])
+
   return (
     <div className={`app${effectiveSidebarVisible ? '' : ' sidebar-hidden'}`} style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties}>
       <div className="app-body">
@@ -215,6 +246,14 @@ export default function App() {
           onDrop={handleDrop}
         >
           <div className="titlebar-drag" />
+          <div className="titlebar-content">
+            {documentTitle && (
+              <div className="document-title">
+                {documentTitle}
+                <div className="titlebar-word-count">字数 {wordCount}</div>
+              </div>
+            )}
+          </div>
           {activeFile ? (
             // Key the editor subtree by file path so each document gets a fresh
             // Milkdown instance, factory, and root element. A single long-lived

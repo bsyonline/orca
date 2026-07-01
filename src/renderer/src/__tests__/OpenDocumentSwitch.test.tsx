@@ -51,7 +51,8 @@ describe('open document via File -> Open menu', () => {
   beforeEach(() => {
     providerMounts.length = 0
     providerInstances = 0
-    useAppStore.setState({ workspaceRoot: null, fileTree: [], activeFile: null, activeFileContent: '', openDocs: [] })
+    useAppStore.setState({ workspaceRoot: null, fileTree: [], activeFile: null, activeFileContent: '', isDirty: false, openDocs: [] })
+    vi.restoreAllMocks()
   })
 
   it('switches A -> B and gives each document its own Milkdown provider', async () => {
@@ -257,5 +258,31 @@ describe('open document via File -> Open menu', () => {
     })
     expect(useAppStore.getState().openDocs).toEqual(['/docs/A.md', '/docs/B.md'])
     expect(useAppStore.getState().activeFile, 'closing a background doc must not switch active').toBe('/docs/A.md')
+  })
+
+  it('asks before closing the dirty active doc and keeps it open when cancelled', async () => {
+    Object.defineProperty(window, 'api', {
+      value: makeApi(),
+      writable: true,
+      configurable: true,
+    })
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    useAppStore.setState({
+      activeFile: '/docs/A.md',
+      activeFileContent: '# A edited',
+      isDirty: true,
+      openDocs: ['/docs/A.md', '/docs/B.md'],
+    })
+
+    render(<App />)
+
+    await act(async () => {
+      screen.getByLabelText('关闭 A.md').click()
+      await Promise.resolve()
+    })
+
+    expect(window.confirm).toHaveBeenCalled()
+    expect(useAppStore.getState().openDocs).toEqual(['/docs/A.md', '/docs/B.md'])
+    expect(useAppStore.getState().activeFile).toBe('/docs/A.md')
   })
 })
