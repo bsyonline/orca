@@ -74,7 +74,7 @@ button { font-family: inherit; }
   flex-direction: column;
   padding-top: 38px;
   background: var(--bg-page);
-  margin-left: 8px;
+  margin-left: 0;
   border-radius: 12px 0 0 12px;
   position: relative;
 }
@@ -82,7 +82,7 @@ button { font-family: inherit; }
 .titlebar-drag {
   position: fixed;
   top: 0;
-  left: calc(var(--sidebar-width) + 12px);
+  left: var(--sidebar-width);
   right: 0;
   height: 38px;
   -webkit-app-region: drag;

@@ -15,27 +15,26 @@ export function SidebarResizer({
   maxWidthRatio,
 }: SidebarResizerProps) {
   const [isDragging, setIsDragging] = useState(false)
-  const [dragWidth, setDragWidth] = useState(currentWidth)
+  const [startWidth, setStartWidth] = useState(currentWidth)
   const resizerRef = useRef<HTMLDivElement>(null)
+  const previewLineRef = useRef<HTMLDivElement>(null)
+  const widthIndicatorRef = useRef<HTMLDivElement>(null)
   const dragStartX = useRef(0)
-  const dragStartWidth = useRef(0)
+  const dragWidthRef = useRef(currentWidth)
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault()
-    console.log('[DEBUG] mousedown triggered')
     setIsDragging(true)
-    setDragWidth(currentWidth)
+    setStartWidth(currentWidth)
     dragStartX.current = e.clientX
-    dragStartWidth.current = currentWidth
+    dragWidthRef.current = currentWidth
   }
 
   useEffect(() => {
     if (!isDragging) return
 
-    const sidebar = resizerRef.current?.closest('.sidebar') as HTMLElement | null
-    console.log('[DEBUG] useEffect, sidebar:', sidebar, 'isDragging:', isDragging)
+    const sidebar = document.querySelector('.sidebar') as HTMLElement | null
     if (!sidebar) {
-      console.error('[DEBUG] Cannot find .sidebar parent!')
       setIsDragging(false)
       return
     }
@@ -46,19 +45,23 @@ export function SidebarResizer({
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - dragStartX.current
-      const newWidth = clampWidth(dragStartWidth.current + deltaX)
-      console.log('[DEBUG] mousemove, deltaX:', deltaX, 'newWidth:', newWidth)
-      setDragWidth(newWidth)
+      const newWidth = clampWidth(startWidth + deltaX)
+      dragWidthRef.current = newWidth
       
       // 直接修改sidebar元素宽度（绕过React）
       sidebar.style.width = `${newWidth}px`
+      if (previewLineRef.current) {
+        previewLineRef.current.style.transform = `translateX(${newWidth}px)`
+      }
+      if (widthIndicatorRef.current) {
+        widthIndicatorRef.current.textContent = `${Math.round(newWidth)}px`
+      }
       
       // 同时更新CSS变量（供titlebar等使用）
       document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`)
     }
 
     const handleMouseUp = (e: MouseEvent) => {
-      console.log('[DEBUG] mouseup')
       setIsDragging(false)
       
       // 计算最终宽度
@@ -66,15 +69,13 @@ export function SidebarResizer({
       const getMaxWidth = () => window.innerWidth * maxWidthRatio
       const clampWidth = (width: number) =>
         Math.max(minWidth, Math.min(getMaxWidth(), width))
-      const finalWidth = clampWidth(dragStartWidth.current + deltaX)
+      const finalWidth = clampWidth(startWidth + deltaX)
       
       // 同步到React状态
       onWidthChange(finalWidth)
       
       // 清除直接style，让React接管
-      if (sidebar) {
-        sidebar.style.width = ''
-      }
+      sidebar.style.width = ''
     }
 
     document.addEventListener('mousemove', handleMouseMove)
@@ -84,19 +85,35 @@ export function SidebarResizer({
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [isDragging, minWidth, maxWidthRatio, onWidthChange])
+  }, [isDragging, minWidth, maxWidthRatio, onWidthChange, startWidth])
 
   return (
-    <div
-      ref={resizerRef}
-      className={`sidebar-resizer${isDragging ? ' dragging' : ''}`}
-      onMouseDown={handleMouseDown}
-    >
+    <>
+      <div
+        ref={resizerRef}
+        className={`sidebar-resizer${isDragging ? ' dragging' : ''}`}
+        onMouseDown={handleMouseDown}
+      >
+        <div className="sidebar-resizer-line" />
+        {isDragging && (
+          <div ref={widthIndicatorRef} className="sidebar-width-indicator">
+            {Math.round(currentWidth)}px
+          </div>
+        )}
+      </div>
       {isDragging && (
-        <div className="sidebar-width-indicator">
-          {Math.round(dragWidth)}px
-        </div>
+        <>
+          <div
+            ref={previewLineRef}
+            className="sidebar-resizer-preview"
+            style={{ transform: `translateX(${currentWidth}px)` }}
+          />
+          <div
+            className="sidebar-resizer-original"
+            style={{ left: `${startWidth}px` }}
+          />
+        </>
       )}
-    </div>
+    </>
   )
 }

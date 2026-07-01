@@ -198,13 +198,15 @@ export default function App() {
             ) : (
               <OpenDocsTree openDocs={openDocs} onSelect={handleSwitchDoc} onClose={handleCloseDoc} />
             )}
-            <SidebarResizer
-              currentWidth={sidebarWidth}
-              onWidthChange={setSidebarWidth}
-              minWidth={MIN_SIDEBAR_WIDTH}
-              maxWidthRatio={MAX_SIDEBAR_WIDTH_RATIO}
-            />
           </aside>
+        )}
+        {effectiveSidebarVisible && (
+          <SidebarResizer
+            currentWidth={sidebarWidth}
+            onWidthChange={setSidebarWidth}
+            minWidth={MIN_SIDEBAR_WIDTH}
+            maxWidthRatio={MAX_SIDEBAR_WIDTH_RATIO}
+          />
         )}
         <main
           className={`editor-area${isDragOver ? ' drag-over' : ''}`}

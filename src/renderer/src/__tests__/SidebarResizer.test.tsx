@@ -102,6 +102,33 @@ describe('SidebarResizer', () => {
     setPropertySpy.mockRestore()
   })
 
+  it('moves the dashed preview line with a transform during drag', async () => {
+    const { container } = render(
+      <div className="sidebar" style={{ width: '240px' }}>
+        <SidebarResizer
+          currentWidth={240}
+          onWidthChange={mockOnWidthChange}
+          minWidth={minWidth}
+          maxWidthRatio={maxWidthRatio}
+        />
+      </div>
+    )
+
+    const resizer = container.querySelector('.sidebar-resizer')!
+
+    await act(async () => {
+      fireEvent.mouseDown(resizer, { clientX: 240, preventDefault: vi.fn() })
+    })
+
+    await act(async () => {
+      fireEvent.mouseMove(document, { clientX: 327 })
+    })
+
+    const previewLine = container.querySelector('.sidebar-resizer-preview')
+    expect(previewLine).toBeInTheDocument()
+    expect(previewLine).toHaveStyle({ transform: 'translateX(327px)' })
+  })
+
   it('calls onWidthChange on mouseup', async () => {
     const { container } = render(
       <div className="sidebar" style={{ width: '240px' }}>
