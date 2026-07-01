@@ -31,6 +31,9 @@ export function SidebarResizer({
   useEffect(() => {
     if (!isDragging) return
 
+    const sidebar = resizerRef.current?.closest('.sidebar') as HTMLElement | null
+    if (!sidebar) return
+
     const getMaxWidth = () => window.innerWidth * maxWidthRatio
     const clampWidth = (width: number) =>
       Math.max(minWidth, Math.min(getMaxWidth(), width))
@@ -40,7 +43,10 @@ export function SidebarResizer({
       const newWidth = clampWidth(dragStartWidth.current + deltaX)
       setDragWidth(newWidth)
       
-      // 直接修改CSS变量（不触发渲染）
+      // 直接修改sidebar元素宽度（绕过React）
+      sidebar.style.width = `${newWidth}px`
+      
+      // 同时更新CSS变量（供titlebar等使用）
       document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`)
     }
 
@@ -56,6 +62,11 @@ export function SidebarResizer({
       
       // 同步到React状态
       onWidthChange(finalWidth)
+      
+      // 清除直接style，让React接管
+      if (sidebar) {
+        sidebar.style.width = ''
+      }
     }
 
     document.addEventListener('mousemove', handleMouseMove)
