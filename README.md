@@ -13,6 +13,8 @@ Orca is an open-source Markdown editor desktop app and a Typora alternative, bui
 - Drag-and-drop opening for local `.md` files
 - Export to HTML, PDF, and Word
 - Local image path handling for project-relative assets
+- Smart table navigation: ArrowUp at first row inserts paragraph before table at document start
+- Resizable sidebar with persistent width
 
 ## Development
 

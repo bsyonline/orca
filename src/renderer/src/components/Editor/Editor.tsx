@@ -28,8 +28,9 @@ import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
 import { history } from '@milkdown/kit/plugin/history'
 import { prism, prismConfig } from '@milkdown/plugin-prism'
 import { Milkdown, useEditor, useInstance } from '@milkdown/react'
-import { getMarkdown, callCommand, insert, replaceAll } from '@milkdown/kit/utils'
-import { TextSelection, Selection } from '@milkdown/kit/prose/state'
+import { getMarkdown, callCommand, insert, replaceAll, $prose } from '@milkdown/kit/utils'
+import { TextSelection, Selection, EditorState, Transaction } from '@milkdown/kit/prose/state'
+import { keymap } from '@milkdown/kit/prose/keymap'
 import { useAppStore } from '../../store/useAppStore'
 import { handleImagePaste, handleImageDrop } from '../../lib/imageHandler'
 import { buildHTMLDocument } from '../../lib/exporters/html'
@@ -45,6 +46,59 @@ import '@milkdown/prose/view/style/prosemirror.css'
 interface EditorProps {
   filePath: string
   initialContent: string
+}
+
+// Will be used in Task 4 - exported for internal module use
+export function isAtTableFirstRowFirstCell(state: EditorState): boolean {
+  const { $from } = state.selection
+  
+  for (let d = $from.depth; d >= 0; d--) {
+    const node = $from.node(d)
+    if (node.type.name === 'table') {
+      const tablePos = $from.before(d)
+      
+      if (tablePos !== 0) return false
+      
+      const tableNode = node
+      if (tableNode.childCount === 0) return false
+      
+      const firstRow = tableNode.child(0)
+      if (firstRow.childCount === 0) return false
+      
+      const firstCell = firstRow.child(0)
+      
+      // Position calculation per ProseMirror docs:
+      // tablePos: table node start position
+      // +1: enter table content (after opening tag)
+      // +1: enter row content (after row opening tag)
+      // +1: enter cell content (after cell opening tag)
+      const firstCellContentStart = tablePos + 3
+      const firstCellContentEnd = firstCellContentStart + firstCell.content.size
+      
+      return $from.pos >= firstCellContentStart && $from.pos <= firstCellContentEnd
+    }
+  }
+  
+  return false
+}
+
+// Will be used in Task 4 - exported for internal module use
+export function insertParagraphBeforeTable(state: EditorState, dispatch: (tr: Transaction) => void): boolean {
+  const { $from } = state.selection
+  
+  for (let d = $from.depth; d >= 0; d--) {
+    const node = $from.node(d)
+    if (node.type.name === 'table') {
+      const tablePos = $from.before(d)
+      const paragraph = state.schema.nodes.paragraph.create()
+      const tr = state.tr.insert(tablePos, paragraph)
+      tr.setSelection(TextSelection.create(tr.doc, tablePos + 1))
+      dispatch(tr)
+      return true
+    }
+  }
+  
+  return false
 }
 
 export function Editor({ filePath, initialContent }: EditorProps) {
@@ -110,7 +164,16 @@ export function Editor({ filePath, initialContent }: EditorProps) {
       .use(listener)
       .use(mermaidSchema)
       .use(mermaidRemarkPlugin)
-      .use(mermaidProsePlugin),
+      .use(mermaidProsePlugin)
+      .use($prose(() => keymap({
+        'ArrowUp': (state, dispatch) => {
+          if (!dispatch) return false
+          if (isAtTableFirstRowFirstCell(state)) {
+            return insertParagraphBeforeTable(state, dispatch)
+          }
+          return false
+        }
+      }))),
   )
 
   const [loading, getInstance] = useInstance()

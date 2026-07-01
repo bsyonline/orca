@@ -1,6 +1,4 @@
 :root {
-  --sidebar-width: 240px;
-
   --bg-page:    #FFFFFF;
   --bg-subtle:  #F0F0F0;
   --bg-sidebar: #F7F7F7;
@@ -59,10 +57,12 @@ button { font-family: inherit; }
 .app-body { display: flex; flex: 1; overflow: hidden; background: var(--bg-sidebar); }
 
 .sidebar {
+  position: relative;
   width: var(--sidebar-width);
-  min-width: var(--sidebar-width);
+  min-width: 80px;
   background: var(--bg-sidebar);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
@@ -74,7 +74,7 @@ button { font-family: inherit; }
   flex-direction: column;
   padding-top: 38px;
   background: var(--bg-page);
-  margin-left: 8px;
+  margin-left: 0;
   border-radius: 12px 0 0 12px;
   position: relative;
 }

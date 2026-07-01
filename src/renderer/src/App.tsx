@@ -5,7 +5,11 @@ import { FileTree } from './components/FileTree/FileTree'
 import { OpenDocsTree } from './components/OpenDocsTree/OpenDocsTree'
 import { Editor } from './components/Editor/Editor'
 import { EditorErrorBoundary } from './components/Editor/EditorErrorBoundary'
+import { SidebarResizer } from './components/SidebarResizer/SidebarResizer'
 import { useAppStore } from './store/useAppStore'
+
+const MIN_SIDEBAR_WIDTH = 80
+const MAX_SIDEBAR_WIDTH_RATIO = 0.5
 
 function isMarkdownFile(filePath: string): boolean {
   return /\.(md|markdown)$/i.test(filePath)
@@ -18,6 +22,7 @@ export default function App() {
   // toggle-sidebar flip this to hide it. Workspace mode sets it explicitly on open.
   const [sidebarVisible, setSidebarVisible] = useState(true)
   const [isDragOver, setIsDragOver] = useState(false)
+  const [sidebarWidth, setSidebarWidth] = useState(240)
 
   // Single-file mode: show the open-docs sidebar when 2+ docs are open AND the
   // user hasn't hidden it via focus mode / toggle-sidebar. Workspace mode keeps
@@ -171,8 +176,20 @@ export default function App() {
     return cleanup
   }, [activeFile])
 
+  useEffect(() => {
+    const handleResize = () => {
+      const maxWidth = window.innerWidth * MAX_SIDEBAR_WIDTH_RATIO
+      if (sidebarWidth > maxWidth) {
+        setSidebarWidth(maxWidth)
+        document.documentElement.style.setProperty('--sidebar-width', `${maxWidth}px`)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [sidebarWidth])
+
   return (
-    <div className={`app${effectiveSidebarVisible ? '' : ' sidebar-hidden'}`}>
+    <div className={`app${effectiveSidebarVisible ? '' : ' sidebar-hidden'}`} style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties}>
       <div className="app-body">
         {effectiveSidebarVisible && (
           <aside className="sidebar">
@@ -182,6 +199,14 @@ export default function App() {
               <OpenDocsTree openDocs={openDocs} onSelect={handleSwitchDoc} onClose={handleCloseDoc} />
             )}
           </aside>
+        )}
+        {effectiveSidebarVisible && (
+          <SidebarResizer
+            currentWidth={sidebarWidth}
+            onWidthChange={setSidebarWidth}
+            minWidth={MIN_SIDEBAR_WIDTH}
+            maxWidthRatio={MAX_SIDEBAR_WIDTH_RATIO}
+          />
         )}
         <main
           className={`editor-area${isDragOver ? ' drag-over' : ''}`}

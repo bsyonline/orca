@@ -68,6 +68,7 @@ vi.mock('@milkdown/kit/plugin/history', () => ({ history: 'history' }))
 vi.mock('@milkdown/plugin-prism', () => ({ prism: 'prism', prismConfig: { key: 'prismConfig' } }))
 vi.mock('@milkdown/kit/utils', () => ({
   getMarkdown: vi.fn(), callCommand: vi.fn(), insert: vi.fn(), replaceAll: vi.fn(),
+  $prose: vi.fn((plugin) => plugin),
 }))
 vi.mock('@milkdown/kit/prose/state', () => ({ TextSelection: { create: vi.fn() } }))
 vi.mock('../lib/imageHandler', () => ({ handleImagePaste: vi.fn(), handleImageDrop: vi.fn() }))

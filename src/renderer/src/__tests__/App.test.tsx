@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, act, createEvent, fireEvent } from '@testing-library/react'
+import { render, act, createEvent, fireEvent, waitFor } from '@testing-library/react'
 import App from '../App'
 import { useAppStore } from '../store/useAppStore'
 
@@ -175,5 +175,90 @@ describe('App drag-and-drop', () => {
     })
 
     expect(readFile).not.toHaveBeenCalled()
+  })
+})
+
+describe('App sidebar width adjustment', () => {
+  beforeEach(() => {
+    useAppStore.setState({ 
+      workspaceRoot: '/test', 
+      fileTree: [], 
+      activeFile: null,
+      activeFileContent: '',
+      openDocs: []
+    })
+    Object.defineProperty(window, 'innerWidth', {
+      writable: true,
+      configurable: true,
+      value: 1000,
+    })
+    Object.defineProperty(window, 'api', {
+      value: makeApi(),
+      writable: true,
+      configurable: true,
+    })
+  })
+
+  it('renders SidebarResizer when sidebar is visible', () => {
+    render(<App />)
+
+    const resizer = document.querySelector('.sidebar-resizer')
+    expect(resizer).toBeInTheDocument()
+  })
+
+  it('does not render SidebarResizer when sidebar is hidden', async () => {
+    const toggleSidebarMock = vi.fn()
+    Object.defineProperty(window, 'api', {
+      value: makeApi({
+        onMenuToggleSidebar: (callback: () => void) => {
+          toggleSidebarMock.mockImplementation(callback)
+          return () => {}
+        },
+      }),
+      writable: true,
+      configurable: true,
+    })
+
+    const { rerender } = render(<App />)
+
+    await act(async () => {
+      toggleSidebarMock()
+    })
+
+    rerender(<App />)
+
+    const resizer = document.querySelector('.sidebar-resizer')
+    expect(resizer).not.toBeInTheDocument()
+  })
+
+  it('adjusts width on window resize', async () => {
+    useAppStore.setState({ 
+      activeFile: '/test.md',
+      activeFileContent: '# Test',
+      openDocs: ['/test.md']
+    })
+
+    render(<App />)
+
+    const resizer = document.querySelector('.sidebar-resizer')
+    
+    await act(async () => {
+      fireEvent.mouseDown(resizer!, { clientX: 240, preventDefault: vi.fn() })
+    })
+
+    await act(async () => {
+      fireEvent.mouseUp(document, { clientX: 500 })
+    })
+
+    await act(async () => {
+      window.innerWidth = 600
+      fireEvent(window, new Event('resize'))
+    })
+
+    await waitFor(() => {
+      const sidebar = document.querySelector('.sidebar') as HTMLElement | null
+      const width = sidebar?.style.getPropertyValue('--sidebar-width')
+      expect(parseInt(width || '240')).toBeLessThanOrEqual(300)
+    })
   })
 })
