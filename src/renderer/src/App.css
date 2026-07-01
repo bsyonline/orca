@@ -82,7 +82,7 @@ button { font-family: inherit; }
 .titlebar-drag {
   position: fixed;
   top: 0;
-  left: calc(var(--sidebar-width) + 8px);
+  left: calc(var(--sidebar-width) + 12px);
   right: 0;
   height: 38px;
   -webkit-app-region: drag;
