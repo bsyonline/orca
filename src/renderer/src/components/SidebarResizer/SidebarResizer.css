@@ -1,7 +1,7 @@
 .sidebar-resizer {
   position: absolute;
   top: 0;
-  right: -4px;
+  right: 0;
   width: 8px;
   height: 100%;
   cursor: col-resize;
@@ -12,7 +12,7 @@
   content: '';
   position: absolute;
   top: 0;
-  right: 3px;
+  right: 1px;
   width: 2px;
   height: 100%;
   background: transparent;
@@ -20,11 +20,11 @@
 }
 
 .sidebar-resizer:hover::after {
-  background: rgba(58, 56, 51, 0.2);
+  background: rgba(58, 56, 51, 0.3);
 }
 
 .sidebar-resizer.dragging::after {
-  background: rgba(58, 56, 51, 0.4);
+  background: rgba(58, 56, 51, 0.5);
 }
 
 .sidebar-width-indicator {
